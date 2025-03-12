@@ -12,7 +12,7 @@ class Connect4:
         self.board = [[" " for _ in range(7)] for _ in range(6)]
 
     def display_board(self):
-        print("  1  2  3  4  5  6  7")
+        print("  0  1  2  3  4  5  6")
         for row in self.board:
             print("-" * 22) # Print horizontal line
             print("| " + "| ".join(row) + "| ") # Print column lines
@@ -81,7 +81,55 @@ class Connect4:
         
         return False # No winner
     
-    
-# Testing
-game = Connect4()
-game.display_board()
+    # Check if board is full = draw
+    def is_full(self):
+        return all(self.board[0][col] != " " for col in range(7))
+
+    def play(self):
+        players = [self.PLAYER_1, self.PLAYER_2] # List stores player symbols
+        turn = 0 # 0 for Player 1 (human), 1 for AI
+
+        # Run until win or board is full
+        while True:
+            self.display_board() # Show state of board before each turn
+
+            # turn % 2 == 0 is Player 1's turn
+            # turn % 2 == 1 is Player 2's
+            current_player = players[turn % 2]
+
+            # Makes sure user enters valid column number
+            try:
+                column = int(input(f"Player {turn % 2 + 1} ({current_player}), choose a column (0-6): "))
+
+                # Check if input between 0 & 6
+                if column < 0 or column > 6:
+                    print("Invalid column! Please enter a number between 0 and 6.")
+                    continue # Skip this turn & ask again
+
+            except ValueError:
+                print("Invalid input! Please enter a number between 0 and 6.")
+                continue # Skip this turn & ask again
+
+            # Make a move
+            if self.drop_disc(column, current_player): # If move is valid
+                if self.check_winner(current_player):
+                    self.display_board()
+                    print(f"Player {turn % 2 + 1} ({current_player}) wins!")
+                    break
+            
+                # Check for draw
+                if self.is_full():
+                    self.display_board()
+                    print("A draw!")
+                    break
+
+                turn += 1 # Switch to next player's turn (even is player 1, odd is player 2)
+            else:
+                print("Invalid move! Try again.")
+
+# Start game
+if __name__ == "__main__":
+    game = Connect4()
+    game.play()
+
+# TEST: different wins
