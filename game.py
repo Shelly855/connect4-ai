@@ -1,3 +1,13 @@
+import random
+import time
+from colorama import Fore, Style, init # For colours
+init(autoreset=True) # Reset colour after each print
+
+PLAYER_1_COLOUR = Fore.GREEN
+PLAYER_2_COLOUR = Fore.BLUE
+ERROR_COLOUR = Fore.RED
+AI_COLOUR = Fore.YELLOW
+
 class Connect4:
     
     # Constants: Fixed values that do not change during execution
@@ -12,11 +22,12 @@ class Connect4:
         self.board = [[" " for _ in range(7)] for _ in range(6)]
 
     def display_board(self):
-        print("  0  1  2  3  4  5  6")
+        print("\n  0  1  2  3  4  5  6")
         for row in self.board:
             print("-" * 22) # Print horizontal line
             print("| " + "| ".join(row) + "| ") # Print column lines
         print("-" * 22) # Print bottom horizontal line
+        print("\n")
 
     # Check if column is full - returns Boolean
     def is_valid_move(self, column):
@@ -84,52 +95,89 @@ class Connect4:
     # Check if board is full = draw
     def is_full(self):
         return all(self.board[0][col] != " " for col in range(7))
+    
+    def random_agent(self):
+        valid_moves = [col for col in range(7) if self.is_valid_move(col)]
+
+        if valid_moves:
+            chosen_move = random.choice(valid_moves)
+            return chosen_move
+        return None
 
     def play(self):
         players = [self.PLAYER_1, self.PLAYER_2] # List stores player symbols
-        turn = 0 # 0 for Player 1 (human), 1 for AI
+        turn = 0 # Track turn number (even = human, odd = AI)
 
-        # Run until win or board is full
+         # Run until win or board is full
         while True:
+            print("\n" + "=" * 40)
+
+            if turn % 2 == 0:
+                print((PLAYER_1_COLOUR + f"Player 1's turn ({self.PLAYER_1})").center(40))
+            else:
+                print((PLAYER_2_COLOUR + f"AI's turn ({self.PLAYER_2})").center(40))
+
+            print("=" * 40 + "\n")
+
             self.display_board() # Show state of board before each turn
 
-            # turn % 2 == 0 is Player 1's turn
-            # turn % 2 == 1 is Player 2's
+            # turn % 2 == 0 is human's turn
+            # turn % 2 == 1 is AI's
             current_player = players[turn % 2]
 
-            # Makes sure user enters valid column number
-            try:
-                column = int(input(f"Player {turn % 2 + 1} ({current_player}), choose a column (0-6): "))
+            if turn % 2 == 0: # Human's turn
+                while True: # Loop until valid
 
-                # Check if input between 0 & 6
-                if column < 0 or column > 6:
-                    print("Invalid column! Please enter a number between 0 and 6.")
-                    continue # Skip this turn & ask again
+                    # Makes sure user enters valid column number
+                    try:
+                        column = int(input(f"Player 1 ({self.PLAYER_1}), choose a column (0-6): "))
 
-            except ValueError:
-                print("Invalid input! Please enter a number between 0 and 6.")
-                continue # Skip this turn & ask again
+                        # Check if input between 0 & 6
+                        if 0 <= column <= 6:
+                            if self.is_valid_move(column):
+                                break
+                            else:
+                                print(ERROR_COLOUR + "That column is full! Try again.\n")
+                        else:
+                            print(ERROR_COLOUR + "Oops! Choose a number between 0 and 6.\n")
+
+                    except ValueError:
+                        print(ERROR_COLOUR + "Oops! Please enter a number between 0 and 6.\n")
+            
+            else: # AI's turn
+                print(AI_COLOUR + f"AI ({self.PLAYER_2}) is thinking...\n")
+                time.sleep(1)
+                column = self.random_agent()
 
             # Make a move
             if self.drop_disc(column, current_player): # If move is valid
+                print("\n" + "-" * 40)
+                if turn % 2 == 0:
+                    print((PLAYER_1_COLOUR + f"Player 1 ({self.PLAYER_1}) placed a disc in column {column}.").center(40))
+                else:
+                    print((PLAYER_2_COLOUR + f"AI ({self.PLAYER_2}) placed a disc in column {column}.").center(40))
+
+                print("-" * 40 + "\n")
+                
+                if turn % 2 == 1: # If AI moved
+                    time.sleep(1.5) # Pause to let human see new board before continuing
+
                 if self.check_winner(current_player):
                     self.display_board()
-                    print(f"Player {turn % 2 + 1} ({current_player}) wins!")
+                    print(PLAYER_1_COLOUR + f"\n{'Player 1' if turn % 2 == 0 else 'AI'} ({current_player}) wins!\n")
                     break
             
                 # Check for draw
                 if self.is_full():
                     self.display_board()
-                    print("A draw!")
+                    print(AI_COLOUR + "\nIt's a draw!\n")
                     break
 
                 turn += 1 # Switch to next player's turn (even is player 1, odd is player 2)
-            else:
-                print("Invalid move! Try again.")
 
 # Start game
 if __name__ == "__main__":
     game = Connect4()
     game.play()
 
-# TEST: different wins
+# TEST: draw, AI win
