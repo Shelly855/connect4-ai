@@ -29,23 +29,16 @@ class Connect4:
         print("-" * 22) # Print bottom horizontal line
         print("\n")
 
+    def drop_disc(self, column, player_symbol):
+        row = self.get_lowest_empty_row(column)
+        if row is not None:
+            self.board[row][column] = player_symbol
+            return True
+        return False
+
     # Check if column is full - returns Boolean
     def is_valid_move(self, column):
         return self.board[0][column] == " " # Checks top row (row index 0)
-
-    def drop_disc(self, column, player_symbol):
-        if not self.is_valid_move(column):
-            return False # Invalid move
-        
-        # range (start, stop, step):
-        # - Start from bottom row (5)
-        # - Run until row 0, stop before -1 (makes sure all 6 rows are checked (5-0))
-        # - Moves backward (from bottom to top)
-        for row in range(5, -1, -1):
-            if self.board[row][column] == " ": # Check if slot is empty
-                self.board[row][column] = player_symbol # Place disc in slot
-                return True # Successful move
-        return False
     
     def check_winner(self, player_symbol):
 
@@ -103,6 +96,34 @@ class Connect4:
             chosen_move = random.choice(valid_moves)
             return chosen_move
         return None
+    
+    # For smart agent method
+    def find_winning_move(self, player_symbol):
+        for col in range(7):
+            if self.is_valid_move(col):
+                row = self.get_lowest_empty_row(col)
+                if row is not None:
+                    self.board[row][col] = player_symbol # Place disc temporarily
+                    if self.check_winner(player_symbol):
+                        self.board[row][col] = " " # Undo move
+                        return col # Winning column
+                    self.board[row][col] = " "
+        return None # No winning move
+
+    def smart_agent(self):
+
+        # Check if AI can win this turn
+        winning_move = self.find_winning_move(self.PLAYER_2)
+        if winning_move is not None:
+            return winning_move # Play winning move
+        
+        # Check if human is about to win and block them
+        blocking_move = self.find_winning_move(self.PLAYER_1)
+        if blocking_move is not None:
+            return blocking_move # Block human from winning
+        
+        # Pick random move
+        return self.random_agent()
 
     def play(self):
         players = [self.PLAYER_1, self.PLAYER_2] # List stores player symbols
@@ -110,16 +131,14 @@ class Connect4:
 
          # Run until win or board is full
         while True:
-            print("\n" + "=" * 40)
-
-            if turn % 2 == 0:
-                print((PLAYER_1_COLOUR + f"Player 1's turn ({self.PLAYER_1})").center(40))
-            else:
-                print((PLAYER_2_COLOUR + f"AI's turn ({self.PLAYER_2})").center(40))
-
-            print("=" * 40 + "\n")
-
+            self.announce_turn(turn)
             self.display_board() # Show state of board before each turn
+
+            # Check for draw
+            if self.is_full():
+                self.display_board()
+                print(AI_COLOUR + "\nIt's a draw!\n")
+                return # End game
 
             # turn % 2 == 0 is human's turn
             # turn % 2 == 1 is AI's
@@ -147,17 +166,16 @@ class Connect4:
             else: # AI's turn
                 print(AI_COLOUR + f"AI ({self.PLAYER_2}) is thinking...\n")
                 time.sleep(1)
-                column = self.random_agent()
+                column = self.smart_agent()
+
+                # If AI has no valid moves
+                if column is None:
+                    print(ERROR_COLOUR + "AI couldn't find a valid move! The game is likely a draw.")
+                    return # End game
 
             # Make a move
             if self.drop_disc(column, current_player): # If move is valid
-                print("\n" + "-" * 40)
-                if turn % 2 == 0:
-                    print((PLAYER_1_COLOUR + f"Player 1 ({self.PLAYER_1}) placed a disc in column {column}.").center(40))
-                else:
-                    print((PLAYER_2_COLOUR + f"AI ({self.PLAYER_2}) placed a disc in column {column}.").center(40))
-
-                print("-" * 40 + "\n")
+                self.announce_move(turn, column) # Announce the move that was made
                 
                 if turn % 2 == 1: # If AI moved
                     time.sleep(1.5) # Pause to let human see new board before continuing
@@ -166,18 +184,42 @@ class Connect4:
                     self.display_board()
                     print(PLAYER_1_COLOUR + f"\n{'Player 1' if turn % 2 == 0 else 'AI'} ({current_player}) wins!\n")
                     break
-            
-                # Check for draw
-                if self.is_full():
-                    self.display_board()
-                    print(AI_COLOUR + "\nIt's a draw!\n")
-                    break
 
                 turn += 1 # Switch to next player's turn (even is player 1, odd is player 2)
 
+    def get_lowest_empty_row(self, column):
+
+        # range (start, stop, step):
+        # - Start from bottom row (5)
+        # - Run until row 0, stop before -1 (makes sure all 6 rows are checked (5-0))
+        # - Moves backward (from bottom to top)
+        for row in range(5, -1, -1):
+            if self.board[row][column] == " ": # Check if slot is empty
+                return row
+        return None # Column is full
+    
+    # Print whose turn it is
+    def announce_turn(self, turn):
+        print("\n" + "=" * 40)
+        if turn % 2 == 0:
+            print((PLAYER_1_COLOUR + f"Player 1's turn ({self.PLAYER_1})").center(40))
+        else:
+            print((PLAYER_2_COLOUR + f"AI's turn ({self.PLAYER_2})").center(40))
+        print("=" * 40 + "\n")
+
+    # Print the move that was made
+    def announce_move(self, turn, column):
+        print("\n" + "-" * 40)
+        if turn % 2 == 0:
+            print((PLAYER_1_COLOUR + f"Player 1 ({self.PLAYER_1}) placed a disc in column {column}.").center(40))
+        else:
+            print((PLAYER_2_COLOUR + f"AI ({self.PLAYER_2}) placed a disc in column {column}.").center(40))
+        print("-" * 40 + "\n")
+    
 # Start game
 if __name__ == "__main__":
     game = Connect4()
     game.play()
 
-# TEST: draw, AI win
+    
+# TEST: draw
