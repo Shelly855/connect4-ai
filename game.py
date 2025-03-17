@@ -45,15 +45,10 @@ class Connect4:
         # Check for horizontal win -
         for row in range(6): # Iterate through all 6 rows
 
-            # Only check up to column index 3 (last valid starting position)
-            # Checking beyond column 3 would go out of bounds for this 7-column board
-            for col in range(4):
+            for col in range(4): # Only check up to col index 3, otherwise it'll be out of bounds
 
-                # Check if this position and the next 3 to the right match the player's symbol
-                # - col + 0: 1st symbol in sequence
-                # - col + 1: 2nd symbol
-                # - col + 2: 3rd symbol
-                # - col + 3: 4th symbol
+                # Check if this position & the next 3 to the right match the player's symbol
+                # - col + 0: 1st symbol in sequence, col + 1: 2nd symbol, & so on
                 if all(self.board[row][col + i] == player_symbol for i in range(4)):
                     return True # Found 4 in a row - win
                 
@@ -89,6 +84,117 @@ class Connect4:
     def is_full(self):
         return all(self.board[0][col] != " " for col in range(7))
     
+    # Evaluates board for player_symbol (AI or human)
+    # Returns score showing how good the position is for the player
+    def evaluate_board(self, player_symbol):
+        opponent_symbol = self.PLAYER_1 if player_symbol == self.PLAYER_2 else self.PLAYER_2 # Check which symbol belongs to opponent
+        score = 0 # Can increase or decrease
+
+        # Extract every possible horizontal set of 4 pieces
+        for row in range(6):
+            for col in range(4):
+                window = [self.board[row][col + i] for i in range(4)] # Get 4 in a row sequence
+                score += self.assess_pattern(player_symbol, opponent_symbol, window) # Call assess_pattern to analyse how strong pattern is
+
+        # Extract every possible vertical set of 4 pieces
+        for col in range(7):
+            for row in range(3):
+                window = [self.board[row + i][col] for i in range(4)]
+                score += self.assess_pattern(player_symbol, opponent_symbol, window)
+
+        # Extract every possible diagonal / set of 4 pieces
+        for row in range(3, 6):
+            for col in range(4):
+                window = [self.board[row - i][col + i] for i in range(4)]
+                score += self.assess_pattern(player_symbol, opponent_symbol, window)
+
+        # Extract every possible diagonal \ set of 4 pieces
+        for row in range(3, 6):
+            for col in range(3, 7):
+                window = [self.board[row - i][col - i] for i in range(4)]
+                score += self.assess_pattern(player_symbol, opponent_symbol, window)
+
+        return score
+    
+    # window = list of 4 consecutive cells
+    # Returns score showing how good or bad this sequence of 4 is
+    def assess_pattern(self, player_symbol, opponent_symbol, window):
+        score = 0
+        opponent_count = window.count(opponent_symbol)
+        player_count = window.count(player_symbol)
+        empty_count = window.count(" ") # empty spaces in board
+
+        # Penalises positions that are strong for opponent
+        if opponent_count == 4: # Opponent wins - bad position
+            score -= 100
+        elif opponent_count == 3 and empty_count == 1: # Opponent nearly winning - needs blocking
+            score -= 10
+        elif opponent_count == 2 and empty_count == 2: # Opponent potentially winning
+            score -= 1
+
+        # Rewards positions that help player win
+        if player_count == 4: # Player wins
+            score += 100
+        elif player_count == 3 and empty_count == 1: # Player nearly winning - good position
+            score += 10
+        elif player_count == 2 and empty_count == 2:
+            score += 1
+
+        # High score = strong position for player
+        # Low/negative score = strong position for opponent
+        # AI will choose move that maximises this
+        return score
+    
+    # maximising_player - True if AI's turn, False if opponent's turn
+    # Depth - controls how many moves ahead the AI looks
+    def minimax_agent(self, maximising_player, depth):
+
+        valid_moves = [col for col in range(7) if self.is_valid_move(col)] # Find all columns where move is possible (not full)
+
+        # Stop search if AI searched deep enough or board full
+        if depth == 0 or self.is_full():
+            return None, self.evaluate_board(self.PLAYER_2) # None because it's an evaluation, not selecting a move
+        
+        if maximising_player:
+            best_score = float('-inf') # Start off as negative infinity because AI wants highest possible score
+            best_move = None
+            for col in valid_moves:
+                row = self.get_lowest_empty_row(col)
+                self.board[row][col] = self.PLAYER_2 # AI makes move (place disc in lowest available row)
+                _, score = self.minimax_agent(depth - 1, False) # Simulate to see how opponent would respond
+                self.board[row][col] = " " # Undo move so to not change the real
+
+                # If this move gives higher score than best score
+                if score > best_score:
+                    best_score = score # Store new best score
+                    best_move = col # Best column to play
+
+            return best_move, best_score
+        
+        else:
+            best_score = float('inf') # Positive infinity because opponent tries to minimise AI's score
+            best_move = None
+
+            # Tries every possible move for opponent (PLAYER_1)
+            for col in valid_moves:
+                row = self.get_lowest_empty_row(col)
+                self.board[row][col] = self.PLAYER_1 # Opponent makes move
+                _, score = self.run_minimax(depth - 1, True) # Simulate AI's response
+                self.board[row][col] = " "
+
+                # Opponent chooses move that lowest AI's score the most
+                if score < best_score:
+                    best_score = score
+                    best_move = col
+
+            return best_move, best_score
+        
+    # AI chooses best move using minimax
+    def minimax_agent_move(self):
+        best_move, _ = self.minimax_agent(3, True)
+        return best_move if best_move is not None else self.random_agent()
+            
+    # AI chooses random move
     def random_agent(self):
         valid_moves = [col for col in range(7) if self.is_valid_move(col)]
 
@@ -166,7 +272,7 @@ class Connect4:
             else: # AI's turn
                 print(AI_COLOUR + f"AI ({self.PLAYER_2}) is thinking...\n")
                 time.sleep(1)
-                column = self.smart_agent()
+                column = self.minimax_agent_move()
 
                 # If AI has no valid moves
                 if column is None:
