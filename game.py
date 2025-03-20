@@ -1,5 +1,6 @@
 import random
 import time
+import math
 from colorama import Fore, Style, init # For colours
 init(autoreset=True) # Reset colour after each print
 
@@ -7,6 +8,7 @@ PLAYER_1_COLOUR = Fore.GREEN
 PLAYER_2_COLOUR = Fore.BLUE
 ERROR_COLOUR = Fore.RED
 AI_COLOUR = Fore.YELLOW
+COLUMN_COUNT = 7
 
 class Connect4:
     
@@ -19,7 +21,7 @@ class Connect4:
     # - Outer loop (for _ in range(6)) repeats this process for 6 rows
     # 'self' = instance of the class, allowing access to its attributes & methods
     def __init__(self):
-        self.board = [[" " for _ in range(7)] for _ in range(6)]
+        self.board = [[" " for _ in range(COLUMN_COUNT)] for _ in range(6)]
 
     def display_board(self):
         print("\n  0  1  2  3  4  5  6")
@@ -147,7 +149,10 @@ class Connect4:
     
     # maximising_player - True if AI's turn, False if opponent's turn
     # Depth - controls how many moves ahead the AI looks
-    def minimax_agent(self, maximising_player, depth):
+    # alpha = -∞ (worst possible start for maximising)
+    # beta = ∞ (worst possible start for minimising)
+    # REFERENCE (for alpha-beta pruning): https://www.youtube.com/watch?v=rbmk1qtVEmg
+    def minimax_agent(self, alpha, beta, maximising_player, depth):
 
         valid_moves = [col for col in range(7) if self.is_valid_move(col)] # Find all columns where move is possible (not full)
 
@@ -161,13 +166,18 @@ class Connect4:
             for col in valid_moves:
                 row = self.get_lowest_empty_row(col)
                 self.board[row][col] = self.PLAYER_2 # AI makes move (place disc in lowest available row)
-                _, score = self.minimax_agent(depth - 1, False) # Simulate to see how opponent would respond
+                _, score = self.minimax_agent(alpha, beta, False, depth - 1) # Simulate to see how opponent would respond
                 self.board[row][col] = " " # Undo move so to not change the real
 
                 # If this move gives higher score than best score
                 if score > best_score:
                     best_score = score # Store new best score
                     best_move = col # Best column to play
+                alpha = max(alpha, best_score)
+
+                # Prune search if alpha value is greater than or equal to beta
+                if alpha >= beta:
+                    break
 
             return best_move, best_score
         
@@ -179,7 +189,7 @@ class Connect4:
             for col in valid_moves:
                 row = self.get_lowest_empty_row(col)
                 self.board[row][col] = self.PLAYER_1 # Opponent makes move
-                _, score = self.run_minimax(depth - 1, True) # Simulate AI's response
+                _, score = self.minimax_agent(alpha, beta, True, depth - 1) # Simulate AI's response
                 self.board[row][col] = " "
 
                 # Opponent chooses move that lowest AI's score the most
@@ -187,11 +197,15 @@ class Connect4:
                     best_score = score
                     best_move = col
 
+                beta = min(beta, best_score)
+                if alpha >= beta:
+                    break
+
             return best_move, best_score
         
     # AI chooses best move using minimax
     def minimax_agent_move(self):
-        best_move, _ = self.minimax_agent(3, True)
+        best_move, _ = self.minimax_agent(-math.inf, math.inf, True, 3)
         return best_move if best_move is not None else self.random_agent()
             
     # AI chooses random move
@@ -231,11 +245,12 @@ class Connect4:
         # Pick random move
         return self.random_agent()
 
+    # Main game loop
     def play(self):
         players = [self.PLAYER_1, self.PLAYER_2] # List stores player symbols
         turn = 0 # Track turn number (even = human, odd = AI)
 
-         # Run until win or board is full
+        # Run until win or board is full
         while True:
             self.announce_turn(turn)
             self.display_board() # Show state of board before each turn
@@ -327,5 +342,6 @@ if __name__ == "__main__":
     game = Connect4()
     game.play()
 
-    
+
 # TEST: draw
+# Define row & column constants
