@@ -9,6 +9,7 @@ PLAYER_2_COLOUR = Fore.BLUE
 ERROR_COLOUR = Fore.RED
 AI_COLOUR = Fore.YELLOW
 COLUMN_COUNT = 7
+ROW_COUNT = 6
 
 class Connect4:
     
@@ -21,7 +22,7 @@ class Connect4:
     # - Outer loop (for _ in range(6)) repeats this process for 6 rows
     # 'self' = instance of the class, allowing access to its attributes & methods
     def __init__(self):
-        self.board = [[" " for _ in range(COLUMN_COUNT)] for _ in range(6)]
+        self.board = [[" " for _ in range(COLUMN_COUNT)] for _ in range(ROW_COUNT)]
 
     def display_board(self):
         print("\n  0  1  2  3  4  5  6")
@@ -45,9 +46,8 @@ class Connect4:
     def check_winner(self, player_symbol):
 
         # Check for horizontal win -
-        for row in range(6): # Iterate through all 6 rows
-
-            for col in range(4): # Only check up to col index 3, otherwise it'll be out of bounds
+        for row in range(ROW_COUNT): # Iterate through all 6 rows
+            for col in range(COLUMN_COUNT - 3): # Only check up to col index 3, otherwise it'll be out of bounds
 
                 # Check if this position & the next 3 to the right match the player's symbol
                 # - col + 0: 1st symbol in sequence, col + 1: 2nd symbol, & so on
@@ -55,14 +55,14 @@ class Connect4:
                     return True # Found 4 in a row - win
                 
         # Check for vertical win |
-        for col in range(7):
-            for row in range(3): # Only check up to row index 2
+        for col in range(COLUMN_COUNT):
+            for row in range(ROW_COUNT - 3): # Only check up to row index 2
                 if all (self.board[row + i][col] == player_symbol for i in range(4)):
                     return True
                 
         # Check for diagonal win /
-        for row in range(3, 6): # Check from rows 3-5 to ensure enough space above for win
-            for col in range(4):
+        for row in range(3, ROW_COUNT): # Check from rows 3-5 to ensure enough space above for win
+            for col in range(COLUMN_COUNT - 3):
 
                 # Check if 4 pieces match diagonally (bottom-left -> top-right)
                 # - row - i moves up (decrease row index)
@@ -71,8 +71,8 @@ class Connect4:
                     return True
                 
         # Check for diagonal win \
-        for row in range(3, 6):
-            for col in range(3, 7):
+        for row in range(3, ROW_COUNT):
+            for col in range(3, COLUMN_COUNT):
 
                 # Check if 4 pieces match diagonally (bottom-right -> top-left)
                 # - row - i moves up
@@ -84,7 +84,7 @@ class Connect4:
     
     # Check if board is full = draw
     def is_full(self):
-        return all(self.board[0][col] != " " for col in range(7))
+        return all(self.board[0][col] != " " for col in range(COLUMN_COUNT))
     
     # Evaluates board for player_symbol (AI or human)
     # Returns score showing how good the position is for the player
@@ -93,26 +93,26 @@ class Connect4:
         score = 0 # Can increase or decrease
 
         # Extract every possible horizontal set of 4 pieces
-        for row in range(6):
-            for col in range(4):
+        for row in range(ROW_COUNT):
+            for col in range(COLUMN_COUNT - 3):
                 window = [self.board[row][col + i] for i in range(4)] # Get 4 in a row sequence
                 score += self.assess_pattern(player_symbol, opponent_symbol, window) # Call assess_pattern to analyse how strong pattern is
 
         # Extract every possible vertical set of 4 pieces
-        for col in range(7):
-            for row in range(3):
+        for col in range(COLUMN_COUNT):
+            for row in range(ROW_COUNT - 3):
                 window = [self.board[row + i][col] for i in range(4)]
                 score += self.assess_pattern(player_symbol, opponent_symbol, window)
 
         # Extract every possible diagonal / set of 4 pieces
-        for row in range(3, 6):
-            for col in range(4):
+        for row in range(3, ROW_COUNT):
+            for col in range(COLUMN_COUNT - 3):
                 window = [self.board[row - i][col + i] for i in range(4)]
                 score += self.assess_pattern(player_symbol, opponent_symbol, window)
 
         # Extract every possible diagonal \ set of 4 pieces
-        for row in range(3, 6):
-            for col in range(3, 7):
+        for row in range(3, ROW_COUNT):
+            for col in range(3, COLUMN_COUNT):
                 window = [self.board[row - i][col - i] for i in range(4)]
                 score += self.assess_pattern(player_symbol, opponent_symbol, window)
 
@@ -154,7 +154,7 @@ class Connect4:
     # REFERENCE (for alpha-beta pruning): https://www.youtube.com/watch?v=rbmk1qtVEmg
     def minimax_agent(self, alpha, beta, maximising_player, depth):
 
-        valid_moves = [col for col in range(7) if self.is_valid_move(col)] # Find all columns where move is possible (not full)
+        valid_moves = [col for col in range(COLUMN_COUNT) if self.is_valid_move(col)] # Find all columns where move is possible (not full)
 
         # Stop search if AI searched deep enough or board full
         if depth == 0 or self.is_full():
@@ -210,7 +210,7 @@ class Connect4:
             
     # AI chooses random move
     def random_agent(self):
-        valid_moves = [col for col in range(7) if self.is_valid_move(col)]
+        valid_moves = [col for col in range(COLUMN_COUNT) if self.is_valid_move(col)]
 
         if valid_moves:
             chosen_move = random.choice(valid_moves)
@@ -219,7 +219,7 @@ class Connect4:
     
     # For smart agent method
     def find_winning_move(self, player_symbol):
-        for col in range(7):
+        for col in range(COLUMN_COUNT):
             if self.is_valid_move(col):
                 row = self.get_lowest_empty_row(col)
                 if row is not None:
@@ -273,7 +273,7 @@ class Connect4:
                         column = int(input(f"Player 1 ({self.PLAYER_1}), choose a column (0-6): "))
 
                         # Check if input between 0 & 6
-                        if 0 <= column <= 6:
+                        if 0 <= column <= COLUMN_COUNT - 1:
                             if self.is_valid_move(column):
                                 break
                             else:
@@ -287,7 +287,9 @@ class Connect4:
             else: # AI's turn
                 print(AI_COLOUR + f"AI ({self.PLAYER_2}) is thinking...\n")
                 time.sleep(1)
-                column = self.minimax_agent_move()
+                # column = self.minimax_agent_move()
+                # column = self.random_agent()
+                column = self.smart_agent()
 
                 # If AI has no valid moves
                 if column is None:
@@ -314,7 +316,7 @@ class Connect4:
         # - Start from bottom row (5)
         # - Run until row 0, stop before -1 (makes sure all 6 rows are checked (5-0))
         # - Moves backward (from bottom to top)
-        for row in range(5, -1, -1):
+        for row in range(ROW_COUNT - 1, -1, -1):
             if self.board[row][column] == " ": # Check if slot is empty
                 return row
         return None # Column is full
