@@ -1,3 +1,8 @@
+# === General References ===
+# - Keith Galli’s Connect 4 AI (GitHub):
+#   https://github.com/KeithGalli/Connect4-Python/blob/master/connect4_with_ai.py
+#   Used as a reference for structuring minimax, alpha-beta pruning, and evaluation heuristics.
+
 import random
 import time
 import math
@@ -151,10 +156,20 @@ class Connect4:
     # Depth - controls how many moves ahead the AI looks
     # alpha = -∞ (worst possible start for maximising)
     # beta = ∞ (worst possible start for minimising)
-    # REFERENCE (for alpha-beta pruning): https://www.youtube.com/watch?v=rbmk1qtVEmg
+
+    # === Reference for alpha beta pruning: Science Buddies YouTube tutorial on minimax with alpha-beta pruning ===
+    #   https://www.youtube.com/watch?v=rbmk1qtVEmg
     def minimax_agent(self, alpha, beta, maximising_player, depth):
 
         valid_moves = [col for col in range(COLUMN_COUNT) if self.is_valid_move(col)] # Find all columns where move is possible (not full)
+
+        # Move-ordering - sort moves (centre first)
+        priority_order = [3, 2, 4, 1, 5, 0, 6] # 3 = index 0 (best)
+
+        # Sort valid moves based on position in priority_order list
+        # lambda col: priority_order.index(col) gives priority ranking for each column
+        # sorted() rearranges valid_moves so centre columns come first
+        valid_moves = sorted(valid_moves, key=lambda col: priority_order.index(col))
 
         # Stop search if AI searched deep enough or board full
         if depth == 0 or self.is_full():
@@ -287,9 +302,10 @@ class Connect4:
             else: # AI's turn
                 print(AI_COLOUR + f"AI ({self.PLAYER_2}) is thinking...\n")
                 time.sleep(1)
-                # column = self.minimax_agent_move()
+                
+                column = self.minimax_agent_move()
                 # column = self.random_agent()
-                column = self.smart_agent()
+                # column = self.smart_agent()
 
                 # If AI has no valid moves
                 if column is None:
@@ -299,9 +315,6 @@ class Connect4:
             # Make a move
             if self.drop_disc(column, current_player): # If move is valid
                 self.announce_move(turn, column) # Announce the move that was made
-                
-                if turn % 2 == 1: # If AI moved
-                    time.sleep(1.5) # Pause to let human see new board before continuing
 
                 if self.check_winner(current_player):
                     self.display_board()
@@ -346,4 +359,3 @@ if __name__ == "__main__":
 
 
 # TEST: draw
-# Define row & column constants
