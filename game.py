@@ -8,8 +8,6 @@ import time
 import math
 from colorama import Fore, Style, init # For colours
 init(autoreset=True) # Reset colour after each print
-import joblib
-model = joblib.load("ml_agent.pkl")
 
 PLAYER_1_COLOUR = Fore.GREEN
 PLAYER_2_COLOUR = Fore.BLUE
@@ -28,8 +26,10 @@ class Connect4:
     # - Inner loop (for _ in range(7)) creates a row of 7 spaces
     # - Outer loop (for _ in range(6)) repeats this process for 6 rows
     # 'self' = instance of the class, allowing access to its attributes & methods
-    def __init__(self):
+    def __init__(self, model=None, agent_type="ml"):
         self.board = [[" " for _ in range(COLUMN_COUNT)] for _ in range(ROW_COUNT)]
+        self.model = model
+        self.agent_type = agent_type
 
     def display_board(self):
         print("\n  0  1  2  3  4  5  6")
@@ -262,13 +262,12 @@ class Connect4:
         # Pick random move
         return self.random_agent()
 
-# Uses dataset from https://archive.ics.uci.edu/dataset/26/connect+4
     def ml_agent_predict(self):
         # Flatten board & convert symbols to numeric
         flat_board = [self.convert_symbol(cell) for row in self.board for cell in row]
 
-        # Predict best column using trained ML model
-        prediction = model.predict([flat_board])[0]
+        # Predict best column using trained ML model (can be original ML or minimax ML agent)
+        prediction = self.model.predict([flat_board])[0]
 
         # Convert from str to int
         column = int(prediction)
@@ -330,7 +329,17 @@ class Connect4:
                 print(AI_COLOUR + f"AI ({self.PLAYER_2}) is thinking...\n")
                 time.sleep(1)
                 
-                column = self.minimax_agent_move()
+                if self.agent_type == "ml":
+                    column = self.ml_agent_predict()
+                elif self.agent_type == "minimax":
+                    column = self.minimax_agent_move()
+                elif self.agent_type == "random":
+                    column = self.random_agent()
+                elif self.agent_type == "smart":
+                    column = self.smart_agent()
+                else:
+                    raise ValueError("Unknown agent type")
+                # column = self.minimax_agent_move()
                 # column = self.ml_agent_predict()
                 # column = self.random_agent()
                 # column = self.smart_agent()
@@ -376,16 +385,55 @@ class Connect4:
         print("\n" + "-" * 40)
         if turn % 2 == 0:
             print((PLAYER_1_COLOUR + f"Player 1 ({self.PLAYER_1}) placed a disc in column {column}.").center(40))
+            time.sleep(1)
         else:
             print((PLAYER_2_COLOUR + f"AI ({self.PLAYER_2}) placed a disc in column {column}.").center(40))
+            time.sleep(1)
         print("-" * 40 + "\n")
     
 # Start game
 if __name__ == "__main__":
-    game = Connect4()
+
+    import joblib
+
+    model = joblib.load("ml_agent.pkl") # Uses dataset from https://archive.ics.uci.edu/dataset/26/connect+4
+    minimax_ml_model = joblib.load("ml_agent_minimax.pkl") # Uses generated minimax dataset
+
+    print("Choose AI agent type:")
+    print("1 - ML Agent (original)")
+    print("2 - ML Agent (minimax-trained)")
+    print("3 - Minimax Agent")
+    print("4 - Smart Agent")
+    print("5 - Random Agent")
+
+    choice = input("Enter choice (1/2/3/4/5): ")
+
+    if choice == "1":
+        agent_type = "ml"
+        model = model
+    elif choice == "2":
+        agent_type = "ml"
+        model = minimax_ml_model
+    elif choice == "3":
+        agent_type = "minimax"
+        model = None
+    elif choice == "4":
+        agent_type = "smart"
+        model = None
+    elif choice == "5":
+        agent_type = "random"
+        model = None
+    else:
+        print("Invalid choice. Defaulting to ML Agent (original).")
+        agent_type = "ml"
+        model = model
+
+    game = Connect4(model=model, agent_type=agent_type)
     game.play()
 
 
 # TO DO:
-# Move ml_agent_minimax(generate minimax dataset jupyter notebook) into project and test it
-# Possibly try improving its accuracy again (changing depth causes problem with generating dataset)
+# Generate game tree and score of minimax agent
+# Improve appearance of agent choices
+# Agents playing against each other
+# Citations
