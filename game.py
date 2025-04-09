@@ -10,7 +10,6 @@ from colorama import Fore, Style, init # For colours
 init(autoreset=True) # Reset colour after each print
 import joblib
 model = joblib.load("ml_agent.pkl")
-print("Example prediction:", model.predict([[0]*42]))
 
 PLAYER_1_COLOUR = Fore.GREEN
 PLAYER_2_COLOUR = Fore.BLUE
