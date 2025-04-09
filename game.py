@@ -8,6 +8,9 @@ import time
 import math
 from colorama import Fore, Style, init # For colours
 init(autoreset=True) # Reset colour after each print
+import joblib
+model = joblib.load("ml_agent.pkl")
+print("Example prediction:", model.predict([[0]*42]))
 
 PLAYER_1_COLOUR = Fore.GREEN
 PLAYER_2_COLOUR = Fore.BLUE
@@ -260,6 +263,31 @@ class Connect4:
         # Pick random move
         return self.random_agent()
 
+# Uses dataset from https://archive.ics.uci.edu/dataset/26/connect+4
+    def ml_agent_predict(self):
+        # Flatten board & convert symbols to numeric
+        flat_board = [self.convert_symbol(cell) for row in self.board for cell in row]
+
+        # Predict best column using trained ML model
+        prediction = model.predict([flat_board])[0]
+
+        # Convert from str to int
+        column = int(prediction)
+
+        # Make sure the predicted move is valid
+        if self.is_valid_move(column):
+            return column
+        else:
+            return self.random_agent() # if column is full
+
+    def convert_symbol(self, symbol):
+        if symbol == self.PLAYER_1:
+            return 1
+        elif symbol == self.PLAYER_2:
+            return -1
+        else:
+            return 0
+
     # Main game loop
     def play(self):
         players = [self.PLAYER_1, self.PLAYER_2] # List stores player symbols
@@ -303,7 +331,7 @@ class Connect4:
                 print(AI_COLOUR + f"AI ({self.PLAYER_2}) is thinking...\n")
                 time.sleep(1)
                 
-                column = self.minimax_agent_move()
+                column = self.ml_agent_predict()
                 # column = self.random_agent()
                 # column = self.smart_agent()
 

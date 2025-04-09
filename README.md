@@ -12,3 +12,6 @@ pip install numpy matplotlib scikit-learn pandas
 - Science Buddies – “Connect 4 AI Player using Minimax Algorithm with Alpha-Beta Pruning: Python Coding Tutorial” (YouTube):
   - https://www.youtube.com/watch?v=rbmk1qtVEmg
   - Used as a reference for alpha-beta pruning
+- Connect 4 Dataset
+  - https://archive.ics.uci.edu/dataset/26/connect+4
+  - Used to train ML agent
