@@ -330,7 +330,8 @@ class Connect4:
                 print(AI_COLOUR + f"AI ({self.PLAYER_2}) is thinking...\n")
                 time.sleep(1)
                 
-                column = self.ml_agent_predict()
+                column = self.minimax_agent_move()
+                # column = self.ml_agent_predict()
                 # column = self.random_agent()
                 # column = self.smart_agent()
 
@@ -385,4 +386,6 @@ if __name__ == "__main__":
     game.play()
 
 
-# TEST: draw
+# TO DO:
+# Move ml_agent_minimax(generate minimax dataset jupyter notebook) into project and test it
+# Possibly try improving its accuracy again (changing depth causes problem with generating dataset)
