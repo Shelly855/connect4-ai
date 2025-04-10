@@ -26,10 +26,12 @@ class Connect4:
     # - Inner loop (for _ in range(7)) creates a row of 7 spaces
     # - Outer loop (for _ in range(6)) repeats this process for 6 rows
     # 'self' = instance of the class, allowing access to its attributes & methods
-    def __init__(self, model=None, agent_type="ml"):
+    def __init__(self, agent1_type="human", agent2_type="ml", agent1_model=None, agent2_model=None):
         self.board = [[" " for _ in range(COLUMN_COUNT)] for _ in range(ROW_COUNT)]
-        self.model = model
-        self.agent_type = agent_type
+        self.agent1_type = agent1_type
+        self.agent2_type = agent2_type
+        self.agent1_model = agent1_model # model used by Player 1 if agent1 is ML
+        self.agent2_model = agent2_model # model used by Player 2 if agent2 is ML
 
     def display_board(self):
         print("\n  0  1  2  3  4  5  6")
@@ -262,12 +264,12 @@ class Connect4:
         # Pick random move
         return self.random_agent()
 
-    def ml_agent_predict(self):
+    def ml_agent_predict(self, model):
         # Flatten board & convert symbols to numeric
         flat_board = [self.convert_symbol(cell) for row in self.board for cell in row]
 
         # Predict best column using trained ML model (can be original ML or minimax ML agent)
-        prediction = self.model.predict([flat_board])[0]
+        prediction = model.predict([flat_board])[0]
 
         # Convert from str to int
         column = int(prediction)
@@ -286,10 +288,28 @@ class Connect4:
         else:
             return 0
 
+    def get_human_move(self, player_symbol):
+        while True: # Loop until valid
+
+            # Makes sure user enters valid column number
+            try:
+                column = int(input(f"Player 1 ({self.PLAYER_1}), choose a column (0-6): "))
+
+                # Check if input between 0 & 6
+                if 0 <= column <= COLUMN_COUNT - 1:
+                    if self.is_valid_move(column):
+                        break
+                    else:
+                        print(ERROR_COLOUR + "That column is full! Try again.\n")
+                else:
+                    print(ERROR_COLOUR + "Oops! Choose a number between 0 and 6.\n")
+            except ValueError:
+                print(ERROR_COLOUR + "Oops! Please enter a number between 0 and 6.\n")
+        
     # Main game loop
     def play(self):
         players = [self.PLAYER_1, self.PLAYER_2] # List stores player symbols
-        turn = 0 # Track turn number (even = human, odd = AI)
+        turn = 0 # Track turn number (even = player 1, odd = player 2)
 
         # Run until win or board is full
         while True:
@@ -302,63 +322,48 @@ class Connect4:
                 print(AI_COLOUR + "\nIt's a draw!\n")
                 return # End game
 
-            # turn % 2 == 0 is human's turn
-            # turn % 2 == 1 is AI's
-            current_player = players[turn % 2]
-
-            if turn % 2 == 0: # Human's turn
-                while True: # Loop until valid
-
-                    # Makes sure user enters valid column number
-                    try:
-                        column = int(input(f"Player 1 ({self.PLAYER_1}), choose a column (0-6): "))
-
-                        # Check if input between 0 & 6
-                        if 0 <= column <= COLUMN_COUNT - 1:
-                            if self.is_valid_move(column):
-                                break
-                            else:
-                                print(ERROR_COLOUR + "That column is full! Try again.\n")
-                        else:
-                            print(ERROR_COLOUR + "Oops! Choose a number between 0 and 6.\n")
-
-                    except ValueError:
-                        print(ERROR_COLOUR + "Oops! Please enter a number between 0 and 6.\n")
+            current_player = self.PLAYER_1 if turn % 2 == 0 else self.PLAYER_2
+            agent_type = self.agent1_type if turn % 2 == 0 else self.agent2_type
             
-            else: # AI's turn
-                print(AI_COLOUR + f"AI ({self.PLAYER_2}) is thinking...\n")
-                time.sleep(1)
+                # print(AI_COLOUR + f"AI ({self.PLAYER_2}) is thinking...\n")
+                # time.sleep(1)
                 
-                if self.agent_type == "ml":
-                    column = self.ml_agent_predict()
-                elif self.agent_type == "minimax":
-                    column = self.minimax_agent_move()
-                elif self.agent_type == "random":
-                    column = self.random_agent()
-                elif self.agent_type == "smart":
-                    column = self.smart_agent()
-                else:
-                    raise ValueError("Unknown agent type")
-                # column = self.minimax_agent_move()
-                # column = self.ml_agent_predict()
-                # column = self.random_agent()
-                # column = self.smart_agent()
+            # Decide move based on agent type
+            if agent_type == "human":
+                column = self.get_human_move(current_player)
+            elif agent_type == "ml":
+                model_to_use = self.agent1_model if turn % 2 == 0 else self.agent2_model
+                column = self.ml_agent_predict(model_to_use)
+            elif agent_type == "minimax":
+                column = self.minimax_agent_move()
+            elif agent_type == "random":
+                column = self.random_agent()
+            elif agent_type == "smart":
+                column = self.smart_agent()
+            elif agent_type == "minimax_ml":
+                model_to_use = self.agent1_model if turn % 2 == 0 else self.agent2_model
+                column = self.ml_agent_predict(model_to_use)
+            else:
+                raise ValueError("Unknown agent type")
 
-                # If AI has no valid moves
-                if column is None:
-                    print(ERROR_COLOUR + "AI couldn't find a valid move! The game is likely a draw.")
-                    return # End game
+            # column = self.minimax_agent_move()
+            # column = self.ml_agent_predict()
+            # column = self.random_agent()
+            # column = self.smart_agent()
+
+            if column is None:
+                print(ERROR_COLOUR + "No valid moves! The game is likely a draw.")
+                return # End game
 
             # Make a move
             if self.drop_disc(column, current_player): # If move is valid
                 self.announce_move(turn, column) # Announce the move that was made
 
-                if self.check_winner(current_player):
-                    self.display_board()
-                    print(PLAYER_1_COLOUR + f"\n{'Player 1' if turn % 2 == 0 else 'AI'} ({current_player}) wins!\n")
-                    break
-
-                turn += 1 # Switch to next player's turn (even is player 1, odd is player 2)
+            if self.check_winner(current_player):
+                self.display_board()
+                print(PLAYER_1_COLOUR + f"\n{'Player 1' if turn % 2 == 0 else 'Player 2'} ({current_player}) wins!\n")
+                break
+            turn += 1 # Switch to next player's turn (even is player 1, odd is player 2)
 
     def get_lowest_empty_row(self, column):
 
@@ -377,7 +382,7 @@ class Connect4:
         if turn % 2 == 0:
             print((PLAYER_1_COLOUR + f"Player 1's turn ({self.PLAYER_1})").center(40))
         else:
-            print((PLAYER_2_COLOUR + f"AI's turn ({self.PLAYER_2})").center(40))
+            print((PLAYER_2_COLOUR + f"Player 2's turn ({self.PLAYER_2})").center(40))
         print("=" * 40 + "\n")
 
     # Print the move that was made
@@ -387,53 +392,132 @@ class Connect4:
             print((PLAYER_1_COLOUR + f"Player 1 ({self.PLAYER_1}) placed a disc in column {column}.").center(40))
             time.sleep(1)
         else:
-            print((PLAYER_2_COLOUR + f"AI ({self.PLAYER_2}) placed a disc in column {column}.").center(40))
+            print((PLAYER_2_COLOUR + f"Player 2 ({self.PLAYER_2}) placed a disc in column {column}.").center(40))
             time.sleep(1)
         print("-" * 40 + "\n")
+
+    def create_minimax_tree(self, player=2, depth=2):
+        player_symbol = self.PLAYER_1 if player == 1 else self.PLAYER_2
+        print(f"Creating minimax tree for Player {player} ({player_symbol})...")
+        self._print_tree_recursive(self.board, depth, True, 0, -math.inf, math.inf, player_symbol)
+
+    def _print_tree_recursive(self, board_state, depth, maximising_player, indent, alpha, beta, player_symbol):
+        indent_str = "    " * indent
+        valid_moves = [col for col in range(COLUMN_COUNT) if board_state[0][col] == " "]
+
+        if depth == 0 or not valid_moves:
+            score = self.evaluate_board(player_symbol)
+            print(f"{indent_str}↳ Score: {score}")
+            return score
+
+        best_score = -math.inf if maximising_player else math.inf
+        best_move = None
+
+        for col in valid_moves:
+            current_symbol = player_symbol if maximising_player else (
+            self.PLAYER_1 if player_symbol == self.PLAYER_2 else self.PLAYER_2
+            )
+            row = self._simulate_drop(board_state, col, current_symbol)
+            if row is None:
+                continue # skip full column
+
+            print(f"{indent_str}Column {col} ({'Maximising' if maximising_player else 'Minimising'}):")
+
+            score = self._print_tree_recursive(board_state, depth - 1, not maximising_player, indent + 1, alpha, beta, player_symbol)
+            board_state[row][col] = " " # undo move
+
+            if maximising_player:
+                if score > best_score:
+                    best_score = score
+                    best_move = col
+                alpha = max(alpha, best_score)
+            else:
+                if score < best_score:
+                    best_score = score
+                    best_move = col
+                beta = min(beta, best_score)
+
+            if alpha >= beta:
+                print(f"{indent_str}⤷ Pruned further moves (alpha ≥ beta)")
+                break
+
+        if indent == 0:
+            print(f"\nBest opening move: Column {best_move} with score {best_score}")
+        return best_score
+
+    def _simulate_drop(self, board, column, symbol):
+        for row in range(ROW_COUNT - 1, -1, -1):
+            if board[row][column] == " ":
+                board[row][column] = symbol
+                return row
+        return None
     
 # Start game
 if __name__ == "__main__":
-
     import joblib
 
-    model = joblib.load("ml_agent.pkl") # Uses dataset from https://archive.ics.uci.edu/dataset/26/connect+4
+    # Load ML models
+    basic_ml_model = joblib.load("ml_agent.pkl") # Uses dataset from https://archive.ics.uci.edu/dataset/26/connect+4
     minimax_ml_model = joblib.load("ml_agent_minimax.pkl") # Uses generated minimax dataset
 
-    print("Choose AI agent type:")
-    print("1 - ML Agent (original)")
-    print("2 - ML Agent (minimax-trained)")
-    print("3 - Minimax Agent")
-    print("4 - Smart Agent")
-    print("5 - Random Agent")
+    print("Choose agent for Player 1:")
+    print("1 - Human")
+    print("2 - Random Agent")
+    print("3 - Smart Agent")
+    print("4 - Minimax Agent")
+    print("5 - Basic ML Agent")
+    print("6 - Minimax-Trained ML Agent")
+    agent1_choice = input("Enter choice (1-6): ")
 
-    choice = input("Enter choice (1/2/3/4/5): ")
+    print("\nChoose agent for Player 2:")
+    print("1 - Human")
+    print("2 - Random Agent")
+    print("3 - Smart Agent")
+    print("4 - Minimax Agent")
+    print("5 - Basic ML Agent")
+    print("6 - Minimax-Trained ML Agent")
+    agent2_choice = input("Enter choice (1-6): ")
 
-    if choice == "1":
-        agent_type = "ml"
-        model = model
-    elif choice == "2":
-        agent_type = "ml"
-        model = minimax_ml_model
-    elif choice == "3":
-        agent_type = "minimax"
-        model = None
-    elif choice == "4":
-        agent_type = "smart"
-        model = None
-    elif choice == "5":
-        agent_type = "random"
-        model = None
-    else:
-        print("Invalid choice. Defaulting to ML Agent (original).")
-        agent_type = "ml"
-        model = model
+    def get_agent_type(choice):
+        if choice == "1":
+            return "human", None
+        elif choice == "2":
+            return "random", None
+        elif choice == "3":
+            return "smart", None
+        elif choice == "4":
+            return "minimax", None
+        elif choice == "5":
+            return "ml", basic_ml_model
+        elif choice == "6":
+            return "minimax_ml", minimax_ml_model
+        else:
+            print("Invalid choice. Defaulting to Human.")
+            return "human", None
+        
+    agent1_type, agent1_model = get_agent_type(agent1_choice)
+    agent2_type, agent2_model = get_agent_type(agent2_choice)
 
-    game = Connect4(model=model, agent_type=agent_type)
+    game = Connect4(agent1_type=agent1_type, agent2_type=agent2_type,
+                    agent1_model=agent1_model, agent2_model=agent2_model)
+
+    # Generate game tree if one of the players is minimax
+    if agent1_type == "minimax":
+        print("\nGenerating game tree for Player 1 (Minimax)...")
+        game.create_minimax_tree(player=1, depth=2)
+
+    if agent2_type == "minimax":
+        print("\nGenerating game tree for Player 2 (Minimax)...")
+        game.create_minimax_tree(player=2, depth=2)
+
     game.play()
 
 
 # TO DO:
-# Generate game tree and score of minimax agent
-# Improve appearance of agent choices
-# Agents playing against each other
+# Choosing agent type - when input is not number, add error messaging, let user try again
+# Minimax game tree appearance
+# Improve appearance of agent type choices
+# Consistent comment capitals
+# More comments
+# Game UI?
 # Citations
