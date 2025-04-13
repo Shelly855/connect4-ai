@@ -298,7 +298,7 @@ class Connect4:
                 # Check if input between 0 & 6
                 if 0 <= column <= COLUMN_COUNT - 1:
                     if self.is_valid_move(column):
-                        break
+                        return column
                     else:
                         print(ERROR_COLOUR + "That column is full! Try again.\n")
                 else:
