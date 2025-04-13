@@ -293,7 +293,8 @@ class Connect4:
 
             # Makes sure user enters valid column number
             try:
-                column = int(input(f"Player 1 ({self.PLAYER_1}), choose a column (0-6): "))
+                player_number = "1" if player_symbol == self.PLAYER_1 else "2"
+                column = int(input(f"Player {player_number} ({player_symbol}), choose a column (0-6): "))
 
                 # Check if input between 0 & 6
                 if 0 <= column <= COLUMN_COUNT - 1:
