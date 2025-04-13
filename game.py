@@ -403,12 +403,12 @@ class Connect4:
         self._print_tree_recursive(self.board, depth, True, 0, -math.inf, math.inf, player_symbol)
 
     def _print_tree_recursive(self, board_state, depth, maximising_player, indent, alpha, beta, player_symbol):
-        indent_str = "    " * indent
+        indent_str = "|   " * indent
         valid_moves = [col for col in range(COLUMN_COUNT) if board_state[0][col] == " "]
 
         if depth == 0 or not valid_moves:
             score = self.evaluate_board(player_symbol)
-            print(f"{indent_str}↳ Score: {score}")
+            print(f"{indent_str}└── Score: {score}")
             return score
 
         best_score = -math.inf if maximising_player else math.inf
@@ -422,7 +422,8 @@ class Connect4:
             if row is None:
                 continue # skip full column
 
-            print(f"{indent_str}Column {col} ({'Maximising' if maximising_player else 'Minimising'}):")
+            move_label = "Max" if maximising_player else "Min"
+            print(f"{indent_str}├── Column {col} ({move_label}, {current_symbol})")
 
             score = self._print_tree_recursive(board_state, depth - 1, not maximising_player, indent + 1, alpha, beta, player_symbol)
             board_state[row][col] = " " # undo move
@@ -439,7 +440,7 @@ class Connect4:
                 beta = min(beta, best_score)
 
             if alpha >= beta:
-                print(f"{indent_str}⤷ Pruned further moves (alpha ≥ beta)")
+                print(f"{indent_str}│   └── Pruned (α ≥ β)")
                 break
 
         if indent == 0:
@@ -503,18 +504,16 @@ if __name__ == "__main__":
 
     # Generate game tree if one of the players is minimax
     if agent1_type == "minimax":
-        print("\nGenerating game tree for Player 1 (Minimax)...")
         game.create_minimax_tree(player=1, depth=2)
 
     if agent2_type == "minimax":
-        print("\nGenerating game tree for Player 2 (Minimax)...")
         game.create_minimax_tree(player=2, depth=2)
 
     game.play()
 
 
 # TO DO:
-# Minimax game tree appearance
+# Minimax game tree appearance more obvious
 # Improve appearance of agent type choices
 # Consistent comment capitals
 # More comments
