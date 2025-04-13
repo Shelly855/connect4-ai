@@ -460,23 +460,22 @@ if __name__ == "__main__":
     basic_ml_model = joblib.load("ml_agent.pkl") # Uses dataset from https://archive.ics.uci.edu/dataset/26/connect+4
     minimax_ml_model = joblib.load("ml_agent_minimax.pkl") # Uses generated minimax dataset
 
-    print("Choose agent for Player 1:")
-    print("1 - Human")
-    print("2 - Random Agent")
-    print("3 - Smart Agent")
-    print("4 - Minimax Agent")
-    print("5 - Basic ML Agent")
-    print("6 - Minimax-Trained ML Agent")
-    agent1_choice = input("Enter choice (1-6): ")
+    def prompt_agent(player_number):
+        while True:
+            print(f"\nChoose agent for Player {player_number}:")
+            print("1 - Human")
+            print("2 - Random Agent")
+            print("3 - Smart Agent")
+            print("4 - Minimax Agent")
+            print("5 - Basic ML Agent")
+            print("6 - Minimax-Trained ML Agent")
+            choice = input("Enter choice (1-6): ")
+            if choice in {"1", "2", "3", "4", "5", "6"}:
+                return choice
+            print(ERROR_COLOUR + "Invalid input. Please enter a number between 1 and 6.")
 
-    print("\nChoose agent for Player 2:")
-    print("1 - Human")
-    print("2 - Random Agent")
-    print("3 - Smart Agent")
-    print("4 - Minimax Agent")
-    print("5 - Basic ML Agent")
-    print("6 - Minimax-Trained ML Agent")
-    agent2_choice = input("Enter choice (1-6): ")
+    agent1_choice = prompt_agent(1)
+    agent2_choice = prompt_agent(2)
 
     def get_agent_type(choice):
         if choice == "1":
@@ -492,7 +491,7 @@ if __name__ == "__main__":
         elif choice == "6":
             return "minimax_ml", minimax_ml_model
         else:
-            print("Invalid choice. Defaulting to Human.")
+            print(ERROR_COLOUR + "Invalid choice. Defaulting to Human.")
             return "human", None
         
     agent1_type, agent1_model = get_agent_type(agent1_choice)
@@ -514,7 +513,6 @@ if __name__ == "__main__":
 
 
 # TO DO:
-# Choosing agent type - when input is not number, add error messaging, let user try again
 # Minimax game tree appearance
 # Improve appearance of agent type choices
 # Consistent comment capitals
