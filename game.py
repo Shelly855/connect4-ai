@@ -302,7 +302,7 @@ class Connect4:
                     else:
                         print(ERROR_COLOUR + "That column is full! Try again.\n")
                 else:
-                    print(ERROR_COLOUR + "Oops! Choose a number between 0 and 6.\n")
+                    print(ERROR_COLOUR + "Oops! Please enter a number between 0 and 6.\n")
             except ValueError:
                 print(ERROR_COLOUR + "Oops! Please enter a number between 0 and 6.\n")
         
@@ -472,7 +472,7 @@ if __name__ == "__main__":
             choice = input("Enter choice (1-6): ")
             if choice in {"1", "2", "3", "4", "5", "6"}:
                 return choice
-            print(ERROR_COLOUR + "Invalid input. Please enter a number between 1 and 6.")
+            print(ERROR_COLOUR + "Oops! Please enter a number between 1 and 6.")
 
     agent1_choice = prompt_agent(1)
     agent2_choice = prompt_agent(2)
