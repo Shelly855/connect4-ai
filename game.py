@@ -6,6 +6,8 @@
 import random
 import time
 import math
+import tkinter as tk
+from config import ROW_COUNT, COLUMN_COUNT, PLAYER_1_COLOUR, PLAYER_2_COLOUR
 from colorama import Fore, Style, init # For colours
 init(autoreset=True) # Reset colour after each print
 
@@ -13,8 +15,6 @@ PLAYER_1_COLOUR = Fore.GREEN
 PLAYER_2_COLOUR = Fore.BLUE
 ERROR_COLOUR = Fore.RED
 AI_COLOUR = Fore.YELLOW
-COLUMN_COUNT = 7
-ROW_COUNT = 6
 
 class Connect4:
     
@@ -397,18 +397,18 @@ class Connect4:
             time.sleep(1)
         print("-" * 40 + "\n")
 
-    def create_minimax_tree(self, player=2, depth=2):
-        player_symbol = self.PLAYER_1 if player == 1 else self.PLAYER_2
-        print(f"Creating minimax tree for Player {player} ({player_symbol})...")
-        self._print_tree_recursive(self.board, depth, True, 0, -math.inf, math.inf, player_symbol)
+    # def create_minimax_tree(self, player=2, depth=2):
+    #     player_symbol = self.PLAYER_1 if player == 1 else self.PLAYER_2
+    #     print(f"Creating minimax tree for Player {player} ({player_symbol})...")
+    #     self._print_tree_recursive(self.board, depth, True, 0, -math.inf, math.inf, player_symbol)
 
-    def _print_tree_recursive(self, board_state, depth, maximising_player, indent, alpha, beta, player_symbol):
+    def _print_tree_recursive(self, board_state, depth, maximising_player, indent, alpha, beta, player_symbol, output_widget):
         indent_str = "|   " * indent
         valid_moves = [col for col in range(COLUMN_COUNT) if board_state[0][col] == " "]
 
         if depth == 0 or not valid_moves:
             score = self.evaluate_board(player_symbol)
-            print(f"{indent_str}└── Score: {score}")
+            output_widget.insert(tk.END, f"{indent_str}└── Score: {score}\n")
             return score
 
         best_score = -math.inf if maximising_player else math.inf
@@ -423,9 +423,9 @@ class Connect4:
                 continue # skip full column
 
             move_label = "Max" if maximising_player else "Min"
-            print(f"{indent_str}├── Column {col} ({move_label}, {current_symbol})")
+            output_widget.insert(tk.END, f"{indent_str}├── Column {col} ({move_label}, {current_symbol})\n")
 
-            score = self._print_tree_recursive(board_state, depth - 1, not maximising_player, indent + 1, alpha, beta, player_symbol)
+            score = self._print_tree_recursive(board_state, depth - 1, not maximising_player, indent + 1, alpha, beta, player_symbol, output_widget)
             board_state[row][col] = " " # undo move
 
             if maximising_player:
@@ -440,11 +440,11 @@ class Connect4:
                 beta = min(beta, best_score)
 
             if alpha >= beta:
-                print(f"{indent_str}│   └── Pruned (α ≥ β)")
+                output_widget.insert(tk.END, f"{indent_str}│   └── Pruned (α ≥ β)\n")
                 break
 
         if indent == 0:
-            print(f"\nBest opening move: Column {best_move} with score {best_score}")
+            output_widget.insert(tk.END, f"\nBest opening move: Column {best_move} with score {best_score}\n")
         return best_score
 
     def _simulate_drop(self, board, column, symbol):
@@ -457,65 +457,39 @@ class Connect4:
 # Start game
 if __name__ == "__main__":
     import joblib
+    from connect4_gui import StartScreen, Connect4GUI
+    from config import *
+
+    AGENT_MAP = {
+        "Human": "human",
+        "Random Agent": "random",
+        "Smart Agent": "smart",
+        "Minimax Agent": "minimax",
+        "Basic ML Agent": "ml",
+        "Minimax-Trained ML Agent": "minimax_ml"
+    }
 
     # Load ML models
     basic_ml_model = joblib.load("ml_agent.pkl") # Uses dataset from https://archive.ics.uci.edu/dataset/26/connect+4
     minimax_ml_model = joblib.load("ml_agent_minimax.pkl") # Uses generated minimax dataset
 
-    def prompt_agent(player_number):
-        while True:
-            print(f"\nChoose agent for Player {player_number}:")
-            print("1 - Human")
-            print("2 - Random Agent")
-            print("3 - Smart Agent")
-            print("4 - Minimax Agent")
-            print("5 - Basic ML Agent")
-            print("6 - Minimax-Trained ML Agent")
-            choice = input("Enter choice (1-6): ")
-            if choice in {"1", "2", "3", "4", "5", "6"}:
-                return choice
-            print(ERROR_COLOUR + "Oops! Please enter a number between 1 and 6.")
+    def start_game(agent1_name, agent2_name):
+        agent1_type = AGENT_MAP.get(agent1_name, "human")
+        agent2_type = AGENT_MAP.get(agent2_name, "human")
 
-    agent1_choice = prompt_agent(1)
-    agent2_choice = prompt_agent(2)
+        agent1_model = basic_ml_model if agent1_type == "ml" else None
+        agent2_model = minimax_ml_model if agent2_type == "minimax_ml" else None
 
-    def get_agent_type(choice):
-        if choice == "1":
-            return "human", None
-        elif choice == "2":
-            return "random", None
-        elif choice == "3":
-            return "smart", None
-        elif choice == "4":
-            return "minimax", None
-        elif choice == "5":
-            return "ml", basic_ml_model
-        elif choice == "6":
-            return "minimax_ml", minimax_ml_model
-        else:
-            print(ERROR_COLOUR + "Invalid choice. Defaulting to Human.")
-            return "human", None
-        
-    agent1_type, agent1_model = get_agent_type(agent1_choice)
-    agent2_type, agent2_model = get_agent_type(agent2_choice)
+        Connect4GUI(agent1_type, agent2_type, agent1_model, agent2_model)
 
-    game = Connect4(agent1_type=agent1_type, agent2_type=agent2_type,
-                    agent1_model=agent1_model, agent2_model=agent2_model)
+    root = tk.Tk()
+    root.title("Connect 4 Setup")
+    StartScreen(root, start_game)
+    root.mainloop()
 
-    # Generate game tree if one of the players is minimax
-    if agent1_type == "minimax":
-        game.create_minimax_tree(player=1, depth=2)
-
-    if agent2_type == "minimax":
-        game.create_minimax_tree(player=2, depth=2)
-
-    game.play()
 
 
 # TO DO:
-# Minimax game tree appearance more obvious
-# Improve appearance of agent type choices
 # Consistent comment capitals
 # More comments
-# Game UI?
-# Citations
+# Add citations used
