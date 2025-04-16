@@ -4,7 +4,6 @@
 #   Used as a reference for structuring minimax, alpha-beta pruning, and evaluation heuristics.
 
 import random
-import time
 import math
 import tkinter as tk
 from config import ROW_COUNT, COLUMN_COUNT, PLAYER_1_COLOUR, PLAYER_2_COLOUR
@@ -12,8 +11,8 @@ from config import ROW_COUNT, COLUMN_COUNT, PLAYER_1_COLOUR, PLAYER_2_COLOUR
 class Connect4:
     
     # Constants: Fixed values that do not change during execution
-    PLAYER_1 = "●" # Human
-    PLAYER_2 = "○" # AI
+    PLAYER_1 = "●"
+    PLAYER_2 = "○"
 
     # Initialise a 6-row by 7-column empty board as a nested list:
     # - Inner loop (for _ in range(7)) creates a row of 7 spaces
@@ -25,14 +24,6 @@ class Connect4:
         self.agent2_type = agent2_type
         self.agent1_model = agent1_model # model used by Player 1 if agent1 is ML
         self.agent2_model = agent2_model # model used by Player 2 if agent2 is ML
-
-    def display_board(self):
-        print("\n  0  1  2  3  4  5  6")
-        for row in self.board:
-            print("-" * 22) # Print horizontal line
-            print("| " + "| ".join(row) + "| ") # Print column lines
-        print("-" * 22) # Print bottom horizontal line
-        print("\n")
 
     def drop_disc(self, column, player_symbol):
         row = self.get_lowest_empty_row(column)
@@ -281,84 +272,6 @@ class Connect4:
         else:
             return 0
 
-    def get_human_move(self, player_symbol):
-        while True: # Loop until valid
-
-            # Makes sure user enters valid column number
-            try:
-                player_number = "1" if player_symbol == self.PLAYER_1 else "2"
-                column = int(input(f"Player {player_number} ({player_symbol}), choose a column (0-6): "))
-
-                # Check if input between 0 & 6
-                if 0 <= column <= COLUMN_COUNT - 1:
-                    if self.is_valid_move(column):
-                        return column
-                    else:
-                        print(ERROR_COLOUR + "That column is full! Try again.\n")
-                else:
-                    print(ERROR_COLOUR + "Oops! Please enter a number between 0 and 6.\n")
-            except ValueError:
-                print(ERROR_COLOUR + "Oops! Please enter a number between 0 and 6.\n")
-        
-    # Main game loop
-    def play(self):
-        players = [self.PLAYER_1, self.PLAYER_2] # List stores player symbols
-        turn = 0 # Track turn number (even = player 1, odd = player 2)
-
-        # Run until win or board is full
-        while True:
-            self.announce_turn(turn)
-            self.display_board() # Show state of board before each turn
-
-            # Check for draw
-            if self.is_full():
-                self.display_board()
-                print(AI_COLOUR + "\nIt's a draw!\n")
-                return # End game
-
-            current_player = self.PLAYER_1 if turn % 2 == 0 else self.PLAYER_2
-            agent_type = self.agent1_type if turn % 2 == 0 else self.agent2_type
-            
-                # print(AI_COLOUR + f"AI ({self.PLAYER_2}) is thinking...\n")
-                # time.sleep(1)
-                
-            # Decide move based on agent type
-            if agent_type == "human":
-                column = self.get_human_move(current_player)
-            elif agent_type == "ml":
-                model_to_use = self.agent1_model if turn % 2 == 0 else self.agent2_model
-                column = self.ml_agent_predict(model_to_use)
-            elif agent_type == "minimax":
-                column = self.minimax_agent_move()
-            elif agent_type == "random":
-                column = self.random_agent()
-            elif agent_type == "smart":
-                column = self.smart_agent()
-            elif agent_type == "minimax_ml":
-                model_to_use = self.agent1_model if turn % 2 == 0 else self.agent2_model
-                column = self.ml_agent_predict(model_to_use)
-            else:
-                raise ValueError("Unknown agent type")
-
-            # column = self.minimax_agent_move()
-            # column = self.ml_agent_predict()
-            # column = self.random_agent()
-            # column = self.smart_agent()
-
-            if column is None:
-                print(ERROR_COLOUR + "No valid moves! The game is likely a draw.")
-                return # End game
-
-            # Make a move
-            if self.drop_disc(column, current_player): # If move is valid
-                self.announce_move(turn, column) # Announce the move that was made
-
-            if self.check_winner(current_player):
-                self.display_board()
-                print(PLAYER_1_COLOUR + f"\n{'Player 1' if turn % 2 == 0 else 'Player 2'} ({current_player}) wins!\n")
-                break
-            turn += 1 # Switch to next player's turn (even is player 1, odd is player 2)
-
     def get_lowest_empty_row(self, column):
 
         # range (start, stop, step):
@@ -369,26 +282,6 @@ class Connect4:
             if self.board[row][column] == " ": # Check if slot is empty
                 return row
         return None # Column is full
-    
-    # Print whose turn it is
-    def announce_turn(self, turn):
-        print("\n" + "=" * 40)
-        if turn % 2 == 0:
-            print((PLAYER_1_COLOUR + f"Player 1's turn ({self.PLAYER_1})").center(40))
-        else:
-            print((PLAYER_2_COLOUR + f"Player 2's turn ({self.PLAYER_2})").center(40))
-        print("=" * 40 + "\n")
-
-    # Print the move that was made
-    def announce_move(self, turn, column):
-        print("\n" + "-" * 40)
-        if turn % 2 == 0:
-            print((PLAYER_1_COLOUR + f"Player 1 ({self.PLAYER_1}) placed a disc in column {column}.").center(40))
-            time.sleep(1)
-        else:
-            print((PLAYER_2_COLOUR + f"Player 2 ({self.PLAYER_2}) placed a disc in column {column}.").center(40))
-            time.sleep(1)
-        print("-" * 40 + "\n")
 
     def _print_tree_recursive(self, board_state, depth, maximising_player, indent, alpha, beta, player_symbol, output_widget):
         indent_str = "|   " * indent
@@ -474,7 +367,6 @@ if __name__ == "__main__":
     root.title("Connect 4 Setup")
     StartScreen(root, start_game)
     root.mainloop()
-
 
 
 # TO DO:
