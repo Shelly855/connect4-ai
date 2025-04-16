@@ -1,0 +1,5 @@
+ROW_COUNT = 6
+COLUMN_COUNT = 7
+PLAYER_1_COLOUR = "green"
+PLAYER_2_COLOUR = "red"
+DRAW_COLOUR = "gray"
