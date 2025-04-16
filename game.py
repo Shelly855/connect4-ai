@@ -8,13 +8,6 @@ import time
 import math
 import tkinter as tk
 from config import ROW_COUNT, COLUMN_COUNT, PLAYER_1_COLOUR, PLAYER_2_COLOUR
-from colorama import Fore, Style, init # For colours
-init(autoreset=True) # Reset colour after each print
-
-PLAYER_1_COLOUR = Fore.GREEN
-PLAYER_2_COLOUR = Fore.BLUE
-ERROR_COLOUR = Fore.RED
-AI_COLOUR = Fore.YELLOW
 
 class Connect4:
     
@@ -396,11 +389,6 @@ class Connect4:
             print((PLAYER_2_COLOUR + f"Player 2 ({self.PLAYER_2}) placed a disc in column {column}.").center(40))
             time.sleep(1)
         print("-" * 40 + "\n")
-
-    # def create_minimax_tree(self, player=2, depth=2):
-    #     player_symbol = self.PLAYER_1 if player == 1 else self.PLAYER_2
-    #     print(f"Creating minimax tree for Player {player} ({player_symbol})...")
-    #     self._print_tree_recursive(self.board, depth, True, 0, -math.inf, math.inf, player_symbol)
 
     def _print_tree_recursive(self, board_state, depth, maximising_player, indent, alpha, beta, player_symbol, output_widget):
         indent_str = "|   " * indent
