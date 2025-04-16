@@ -9,8 +9,6 @@ import tkinter as tk
 from config import ROW_COUNT, COLUMN_COUNT, PLAYER_1_COLOUR, PLAYER_2_COLOUR
 
 class Connect4:
-    
-    # Constants: Fixed values that do not change during execution
     PLAYER_1 = "●"
     PLAYER_2 = "○"
 
@@ -34,27 +32,27 @@ class Connect4:
 
     # Check if column is full - returns Boolean
     def is_valid_move(self, column):
-        return self.board[0][column] == " " # Checks top row (row index 0)
+        return self.board[0][column] == " " # checks top row (row index 0)
     
     def check_winner(self, player_symbol):
 
         # Check for horizontal win -
-        for row in range(ROW_COUNT): # Iterate through all 6 rows
-            for col in range(COLUMN_COUNT - 3): # Only check up to col index 3, otherwise it'll be out of bounds
+        for row in range(ROW_COUNT): # iterate through all 6 rows
+            for col in range(COLUMN_COUNT - 3): # only check up to col index 3, otherwise it'll be out of bounds
 
                 # Check if this position & the next 3 to the right match the player's symbol
                 # - col + 0: 1st symbol in sequence, col + 1: 2nd symbol, & so on
                 if all(self.board[row][col + i] == player_symbol for i in range(4)):
-                    return True # Found 4 in a row - win
+                    return True # found 4 in a row - win
                 
         # Check for vertical win |
         for col in range(COLUMN_COUNT):
-            for row in range(ROW_COUNT - 3): # Only check up to row index 2
+            for row in range(ROW_COUNT - 3): # only check up to row index 2
                 if all (self.board[row + i][col] == player_symbol for i in range(4)):
                     return True
                 
         # Check for diagonal win /
-        for row in range(3, ROW_COUNT): # Check from rows 3-5 to ensure enough space above for win
+        for row in range(3, ROW_COUNT): # check from rows 3-5 to ensure enough space above for win
             for col in range(COLUMN_COUNT - 3):
 
                 # Check if 4 pieces match diagonally (bottom-left -> top-right)
@@ -73,37 +71,36 @@ class Connect4:
                 if all(self.board[row - i][col - i] == player_symbol for i in range(4)):
                     return True
         
-        return False # No winner
+        return False # no winner
     
-    # Check if board is full = draw
+    # Check if draw
     def is_full(self):
         return all(self.board[0][col] != " " for col in range(COLUMN_COUNT))
     
-    # Evaluates board for player_symbol (AI or human)
     # Returns score showing how good the position is for the player
     def evaluate_board(self, player_symbol):
-        opponent_symbol = self.PLAYER_1 if player_symbol == self.PLAYER_2 else self.PLAYER_2 # Check which symbol belongs to opponent
-        score = 0 # Can increase or decrease
+        opponent_symbol = self.PLAYER_1 if player_symbol == self.PLAYER_2 else self.PLAYER_2
+        score = 0
 
         # Extract every possible horizontal set of 4 pieces
         for row in range(ROW_COUNT):
             for col in range(COLUMN_COUNT - 3):
-                window = [self.board[row][col + i] for i in range(4)] # Get 4 in a row sequence
-                score += self.assess_pattern(player_symbol, opponent_symbol, window) # Call assess_pattern to analyse how strong pattern is
+                window = [self.board[row][col + i] for i in range(4)] # get 4 in a row sequence
+                score += self.assess_pattern(player_symbol, opponent_symbol, window) # call function to analyse how strong pattern is
 
-        # Extract every possible vertical set of 4 pieces
+        # Extract every possible vertical set
         for col in range(COLUMN_COUNT):
             for row in range(ROW_COUNT - 3):
                 window = [self.board[row + i][col] for i in range(4)]
                 score += self.assess_pattern(player_symbol, opponent_symbol, window)
 
-        # Extract every possible diagonal / set of 4 pieces
+        # Extract every possible diagonal / set
         for row in range(3, ROW_COUNT):
             for col in range(COLUMN_COUNT - 3):
                 window = [self.board[row - i][col + i] for i in range(4)]
                 score += self.assess_pattern(player_symbol, opponent_symbol, window)
 
-        # Extract every possible diagonal \ set of 4 pieces
+        # Extract every possible diagonal \ set
         for row in range(3, ROW_COUNT):
             for col in range(3, COLUMN_COUNT):
                 window = [self.board[row - i][col - i] for i in range(4)]
@@ -112,7 +109,7 @@ class Connect4:
         return score
     
     # window = list of 4 consecutive cells
-    # Returns score showing how good or bad this sequence of 4 is
+    # Returns score showing how good/bad this sequence of 4 is
     def assess_pattern(self, player_symbol, opponent_symbol, window):
         score = 0
         opponent_count = window.count(opponent_symbol)
@@ -120,24 +117,24 @@ class Connect4:
         empty_count = window.count(" ") # empty spaces in board
 
         # Penalises positions that are strong for opponent
-        if opponent_count == 4: # Opponent wins - bad position
+        if opponent_count == 4: # opponent wins - bad position
             score -= 100
-        elif opponent_count == 3 and empty_count == 1: # Opponent nearly winning - needs blocking
+        elif opponent_count == 3 and empty_count == 1: # opponent nearly winning - needs blocking
             score -= 10
-        elif opponent_count == 2 and empty_count == 2: # Opponent potentially winning
+        elif opponent_count == 2 and empty_count == 2: # opponent potentially winning
             score -= 1
 
         # Rewards positions that help player win
-        if player_count == 4: # Player wins
+        if player_count == 4: # player wins
             score += 100
-        elif player_count == 3 and empty_count == 1: # Player nearly winning - good position
+        elif player_count == 3 and empty_count == 1: # player nearly winning - good position
             score += 10
         elif player_count == 2 and empty_count == 2:
             score += 1
 
         # High score = strong position for player
         # Low/negative score = strong position for opponent
-        # AI will choose move that maximises this
+        # Will choose move that maximises this
         return score
     
     # maximising_player - True if AI's turn, False if opponent's turn
@@ -149,7 +146,7 @@ class Connect4:
     #   https://www.youtube.com/watch?v=rbmk1qtVEmg
     def minimax_agent(self, alpha, beta, maximising_player, depth):
 
-        valid_moves = [col for col in range(COLUMN_COUNT) if self.is_valid_move(col)] # Find all columns where move is possible (not full)
+        valid_moves = [col for col in range(COLUMN_COUNT) if self.is_valid_move(col)] #fFind all columns where move is possible (not full)
 
         # Move-ordering - sort moves (centre first)
         priority_order = [3, 2, 4, 1, 5, 0, 6] # 3 = index 0 (best)
@@ -161,21 +158,21 @@ class Connect4:
 
         # Stop search if AI searched deep enough or board full
         if depth == 0 or self.is_full():
-            return None, self.evaluate_board(self.PLAYER_2) # None because it's an evaluation, not selecting a move
+            return None, self.evaluate_board(self.PLAYER_2) # none because it's an evaluation, not selecting a move
         
         if maximising_player:
-            best_score = float('-inf') # Start off as negative infinity because AI wants highest possible score
+            best_score = float('-inf') # start off as negative infinity because AI wants highest possible score
             best_move = None
             for col in valid_moves:
                 row = self.get_lowest_empty_row(col)
                 self.board[row][col] = self.PLAYER_2 # AI makes move (place disc in lowest available row)
-                _, score = self.minimax_agent(alpha, beta, False, depth - 1) # Simulate to see how opponent would respond
-                self.board[row][col] = " " # Undo move so to not change the real
+                _, score = self.minimax_agent(alpha, beta, False, depth - 1) # simulate to see how opponent would respond
+                self.board[row][col] = " " # undo move so to not change the real
 
                 # If this move gives higher score than best score
                 if score > best_score:
-                    best_score = score # Store new best score
-                    best_move = col # Best column to play
+                    best_score = score # store new best score
+                    best_move = col # best column to play
                 alpha = max(alpha, best_score)
 
                 # Prune search if alpha value is greater than or equal to beta
@@ -185,14 +182,14 @@ class Connect4:
             return best_move, best_score
         
         else:
-            best_score = float('inf') # Positive infinity because opponent tries to minimise AI's score
+            best_score = float('inf') # positive infinity because opponent tries to minimise AI's score
             best_move = None
 
             # Tries every possible move for opponent (PLAYER_1)
             for col in valid_moves:
                 row = self.get_lowest_empty_row(col)
-                self.board[row][col] = self.PLAYER_1 # Opponent makes move
-                _, score = self.minimax_agent(alpha, beta, True, depth - 1) # Simulate AI's response
+                self.board[row][col] = self.PLAYER_1 # opponent makes move
+                _, score = self.minimax_agent(alpha, beta, True, depth - 1) # simulate AI's response
                 self.board[row][col] = " "
 
                 # Opponent chooses move that lowest AI's score the most
@@ -226,30 +223,29 @@ class Connect4:
             if self.is_valid_move(col):
                 row = self.get_lowest_empty_row(col)
                 if row is not None:
-                    self.board[row][col] = player_symbol # Place disc temporarily
+                    self.board[row][col] = player_symbol # place disc temporarily
                     if self.check_winner(player_symbol):
-                        self.board[row][col] = " " # Undo move
-                        return col # Winning column
+                        self.board[row][col] = " " # Uudo move
+                        return col # winning column
                     self.board[row][col] = " "
-        return None # No winning move
+        return None # no winning move
 
     def smart_agent(self):
 
         # Check if AI can win this turn
         winning_move = self.find_winning_move(self.PLAYER_2)
         if winning_move is not None:
-            return winning_move # Play winning move
+            return winning_move # play winning move
         
-        # Check if human is about to win and block them
+        # Check if opponent is about to win and block them
         blocking_move = self.find_winning_move(self.PLAYER_1)
         if blocking_move is not None:
-            return blocking_move # Block human from winning
+            return blocking_move # block opponent from winning
         
         # Pick random move
         return self.random_agent()
 
     def ml_agent_predict(self, model):
-        # Flatten board & convert symbols to numeric
         flat_board = [self.convert_symbol(cell) for row in self.board for cell in row]
 
         # Predict best column using trained ML model (can be original ML or minimax ML agent)
@@ -279,9 +275,9 @@ class Connect4:
         # - Run until row 0, stop before -1 (makes sure all 6 rows are checked (5-0))
         # - Moves backward (from bottom to top)
         for row in range(ROW_COUNT - 1, -1, -1):
-            if self.board[row][column] == " ": # Check if slot is empty
+            if self.board[row][column] == " ": # check if slot is empty
                 return row
-        return None # Column is full
+        return None # column is full
 
     def _print_tree_recursive(self, board_state, depth, maximising_player, indent, alpha, beta, player_symbol, output_widget):
         indent_str = "|   " * indent
@@ -351,8 +347,8 @@ if __name__ == "__main__":
     }
 
     # Load ML models
-    basic_ml_model = joblib.load("ml_agent.pkl") # Uses dataset from https://archive.ics.uci.edu/dataset/26/connect+4
-    minimax_ml_model = joblib.load("ml_agent_minimax.pkl") # Uses generated minimax dataset
+    basic_ml_model = joblib.load("ml_agent.pkl") # uses dataset from https://archive.ics.uci.edu/dataset/26/connect+4
+    minimax_ml_model = joblib.load("ml_agent_minimax.pkl") # uses generated minimax dataset
 
     def start_game(agent1_name, agent2_name):
         agent1_type = AGENT_MAP.get(agent1_name, "human")

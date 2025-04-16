@@ -134,7 +134,7 @@ class Connect4GUI:
                     x0+10, y0+10, # inset top left by 10px
                     x1-10, y1-10, # inset bottom right
                     fill="white", 
-                    tags=f"cell_{row}_{col}" # So can update later
+                    tags=f"cell_{row}_{col}" # so can update later
                     )
 
     # Change colour at (row, col) to match player's move
@@ -151,7 +151,7 @@ class Connect4GUI:
         agent_type = self.game.agent1_type if self.turn % 2 == 0 else self.game.agent2_type
         model = self.game.agent1_model if self.turn % 2 == 0 else self.game.agent2_model
 
-        # If it's an AI's turn & no column manually selected
+        # If AI's turn & no column manually selected
         if agent_type != "human" and col is None:
             if agent_type == "random":
                 col = self.game.random_agent()
@@ -162,18 +162,16 @@ class Connect4GUI:
             elif agent_type in ("ml", "minimax_ml"):
                 col = self.game.ml_agent_predict(model)
             else:
-                return  # unknown agent type
+                return
 
         # Invalid or missing column input
         if col is None or not self.game.is_valid_move(col):
             return
-
-        # Drop disc & update board
+        
         row = self.game.get_lowest_empty_row(col)
         self.game.drop_disc(col, current_player)
         self.update_disc(row, col, current_player)
 
-        # Check for win or draw
         if self.game.check_winner(current_player):
             self.canvas.unbind("<Button-1>")
             player_number = "1" if current_player == self.game.PLAYER_1 else "2"
@@ -184,7 +182,7 @@ class Connect4GUI:
 
         if self.game.is_full():
             self.status_label.config(text="It's a draw!", fg=DRAW_COLOUR)
-            self.turn_label.config(text="") # clear turn label
+            self.turn_label.config(text="")
             return
 
         # Next player's turn
