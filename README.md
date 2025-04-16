@@ -14,4 +14,4 @@ pip install numpy matplotlib scikit-learn pandas
   - Used as a reference for alpha-beta pruning
 - Connect 4 Dataset
   - https://archive.ics.uci.edu/dataset/26/connect+4
-  - Used to train original ML agent
+  - Used to train the basic ML agent
