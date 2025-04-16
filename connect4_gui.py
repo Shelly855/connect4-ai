@@ -7,6 +7,11 @@ class Connect4GUI:
     def __init__(self, agent1_type, agent2_type, agent1_model=None, agent2_model=None):
         self.turn = 0
 
+        self.agent1_type = agent1_type
+        self.agent2_type = agent2_type
+        self.agent1_model = agent1_model
+        self.agent2_model = agent2_model
+
         # New window for GUI
         self.root = tk.Toplevel()
         self.root.title("Connect 4")
@@ -37,6 +42,13 @@ class Connect4GUI:
         self.turn_label = tk.Label(self.sidebar, text="", font=("Helvetica", 12))
         self.turn_label.pack(pady=5)
         self.update_turn_label()
+
+        self.reset_button = tk.Button(
+            self.sidebar,
+            text="Reset Game",
+            command=self.reset_board
+        )
+        self.reset_button.pack(pady=10)
 
         # Instructions for human player (only shows if one player is a human)
         if agent1_type == "human" or agent2_type == "human":
@@ -87,25 +99,7 @@ class Connect4GUI:
             # Link scrollbar to text
             scrollbar.config(command=self.tree_output.yview)
 
-            # Generate + display their game tree if player 1 = minimax
-            if agent1_type == "minimax":
-                self.tree_output.insert(tk.END, "\n=== Player 1 Minimax Tree ===\n\n")
-                self.game._print_tree_recursive(
-                    self.game.board, # board_state
-                    2, True, 0, # depth, maximising_player, indent
-                    -math.inf, math.inf,
-                    self.game.PLAYER_1, # player_symbol
-                    self.tree_output
-                )
-
-            if agent2_type == "minimax":
-                self.tree_output.insert(tk.END, "\n=== Player 2 Minimax Tree ===\n\n")
-                self.game._print_tree_recursive(
-                    self.game.board, 2, True, 0,
-                    -math.inf, math.inf,
-                    self.game.PLAYER_2,
-                    self.tree_output
-                )
+            self.refresh_minimax_tree()
 
         # If Player 1 is AI, autostart after main game screen appears
         first_agent = agent1_type
@@ -206,6 +200,61 @@ class Connect4GUI:
         current_player = "Player 1" if self.turn % 2 == 0 else "Player 2"
         colour = PLAYER_1_COLOUR if self.turn % 2 == 0 else PLAYER_2_COLOUR
         self.turn_label.config(text=f"{current_player}'s turn", fg=colour)
+
+    def reset_board(self):
+        self.turn = 0
+        self.game = Connect4(
+            agent1_type=self.agent1_type,
+            agent2_type=self.agent2_type,
+            agent1_model=self.agent1_model,
+            agent2_model=self.agent2_model
+        )
+
+        # Clear outcome and turn messages
+        self.status_label.config(text="")
+        self.turn_label.config(text="")
+        
+        if hasattr(self, "instructions_label"):
+                self.instructions_label.config(
+                    text="If you're a human player, click any column to drop your disc."
+                )
+                self.instructions_label.pack()
+
+        # Clear and redraw board
+        self.canvas.delete("all")
+        self.draw_board()
+        self.canvas.bind("<Button-1>", self.click_handler)
+        self.update_turn_label()
+    
+        self.refresh_minimax_tree()
+        
+        if self.agent1_type != "human":
+            self.root.after(500, self.play_turn)
+
+    def refresh_minimax_tree(self):
+        if hasattr(self, "tree_output"):
+            self.tree_output.delete("1.0", tk.END)
+
+            # Generate + display their game tree if player 1 = minimax
+            if self.agent1_type == "minimax":
+                self.tree_output.insert(tk.END, "\n=== Player 1 Minimax Tree ===\n\n")
+                self.game._print_tree_recursive(
+                    self.game.board, # board_state
+                    2, True, 0, # depth, maximising_player, indent
+                    -math.inf, math.inf,
+                    self.game.PLAYER_1, # player_symbol
+                    self.tree_output
+                )
+
+            if self.agent2_type == "minimax":
+                self.tree_output.insert(tk.END, "\n=== Player 2 Minimax Tree ===\n\n")
+                self.game._print_tree_recursive(
+                    self.game.board, 2, True, 0,
+                    -math.inf, math.inf,
+                    self.game.PLAYER_2,
+                    self.tree_output
+                )
+
 
 AGENT_OPTIONS = [
     "Human",
