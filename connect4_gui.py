@@ -6,6 +6,8 @@ import math
 class Connect4GUI:
     def __init__(self, agent1_type, agent2_type, agent1_model=None, agent2_model=None):
         self.turn = 0
+
+        # New window for GUI
         self.root = tk.Toplevel()
         self.root.title("Connect 4")
 
@@ -16,6 +18,7 @@ class Connect4GUI:
         self.main_frame.pack(padx=20, pady=20)
 
         # Left side: board
+        # Canvas for drawing grid
         self.canvas = tk.Canvas(self.main_frame, width=700, height=600, bg="white")
         self.canvas.pack(side=tk.LEFT)
 
@@ -26,7 +29,7 @@ class Connect4GUI:
         self.sidebar = tk.Frame(self.main_frame)
         self.sidebar.pack(side=tk.RIGHT, padx=20, fill=tk.Y)
 
-        # Shows final results
+        # Shows final outcome
         self.status_label = tk.Label(self.sidebar, text="", font=("Helvetica", 14))
         self.status_label.pack(pady=10)
 
@@ -35,7 +38,7 @@ class Connect4GUI:
         self.turn_label.pack(pady=5)
         self.update_turn_label()
 
-        # Instructions for human player
+        # Instructions for human player (only shows if one player is a human)
         if agent1_type == "human" or agent2_type == "human":
             self.instructions_label = tk.Label(
                 self.sidebar,
@@ -84,12 +87,14 @@ class Connect4GUI:
             # Link scrollbar to text
             scrollbar.config(command=self.tree_output.yview)
 
+            # Generate + display their game tree if player 1 = minimax
             if agent1_type == "minimax":
                 self.tree_output.insert(tk.END, "\n=== Player 1 Minimax Tree ===\n\n")
                 self.game._print_tree_recursive(
-                    self.game.board, 2, True, 0,
+                    self.game.board, # board_state
+                    2, True, 0, # depth, maximising_player, indent
                     -math.inf, math.inf,
-                    self.game.PLAYER_1,
+                    self.game.PLAYER_1, # player_symbol
                     self.tree_output
                 )
 
@@ -102,10 +107,10 @@ class Connect4GUI:
                     self.tree_output
                 )
 
-        # If Player 1 is AI, start playing immediately after main game screen appears
+        # If Player 1 is AI, autostart after main game screen appears
         first_agent = agent1_type
         if first_agent != "human":
-            self.root.after(500, self.play_turn)
+            self.root.after(500, self.play_turn) # wait 0.5s first
 
     def toggle_tree(self):
         if self.tree_visible.get():
@@ -119,13 +124,26 @@ class Connect4GUI:
     def draw_board(self):
         for row in range(ROW_COUNT):
             for col in range(COLUMN_COUNT):
+                # Top left corner of cell
                 x0 = col * 100
                 y0 = row * 100
+
+                # Bottom right corner of cell
                 x1 = x0 + 100
                 y1 = y0 + 100
-                self.canvas.create_rectangle(x0, y0, x1, y1, fill="blue")
-                self.canvas.create_oval(x0+10, y0+10, x1-10, y1-10, fill="white", tags=f"cell_{row}_{col}")
 
+                # Cell background
+                self.canvas.create_rectangle(x0, y0, x1, y1, fill="blue")
+
+                # White circle for disc slots
+                self.canvas.create_oval(
+                    x0+10, y0+10, # inset top left by 10px
+                    x1-10, y1-10, # inset bottom right
+                    fill="white", 
+                    tags=f"cell_{row}_{col}" # So can update later
+                    )
+
+    # Change colour at (row, col) to match player's move
     def update_disc(self, row, col, symbol):
         colour = PLAYER_1_COLOUR if symbol == self.game.PLAYER_1 else PLAYER_2_COLOUR
         self.canvas.itemconfig(f"cell_{row}_{col}", fill=colour)
