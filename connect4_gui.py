@@ -52,6 +52,18 @@ class Connect4GUI:
         self.status_label = tk.Label(self.sidebar, text="", font=("Helvetica", 14))
         self.status_label.pack(pady=10)
 
+        # Speed slider
+        tk.Label(self.sidebar, text="AI Speed (ms):").pack(pady=(10, 0))
+
+        self.speed_slider = tk.Scale(
+            self.sidebar,
+            from_=100, to=2000, # range in ms
+            resolution=100,
+            orient=tk.HORIZONTAL
+        )
+        self.speed_slider.set(1000) # default
+        self.speed_slider.pack()
+
         # Shows whose turn it is
         self.turn_label = tk.Label(self.sidebar, text="", font=("Helvetica", 12))
         self.turn_label.pack(pady=5)
@@ -127,7 +139,8 @@ class Connect4GUI:
         # If Player 1 is AI, autostart after main game screen appears
         first_agent = agent1_type
         if first_agent != "human":
-            self.root.after(500, self.play_turn) # wait 0.5s first
+            delay = self.speed_slider.get() if hasattr(self, "speed_slider") else 1000
+            self.root.after(delay, self.play_turn)
 
     def toggle_tree(self):
         if self.tree_visible.get():
@@ -220,7 +233,9 @@ class Connect4GUI:
         # If next player is AI, play their turn after a delay
         next_agent = self.game.agent1_type if self.turn % 2 == 0 else self.game.agent2_type
         if next_agent != "human":
-            self.root.after(500, self.play_turn)
+            delay = self.speed_slider.get() if hasattr(self, "speed_slider") else 1000
+            self.root.after(delay, self.play_turn)
+
 
     def update_turn_label(self):
         if self.turn % 2 == 0:
@@ -268,7 +283,9 @@ class Connect4GUI:
         self.refresh_minimax_tree()
         
         if self.agent1_type != "human":
-            self.root.after(500, self.play_turn)
+            delay = self.speed_slider.get() if hasattr(self, "speed_slider") else 1000
+            self.root.after(delay, self.play_turn)
+
 
     # Show agent options again
     def return_to_start(self):
@@ -331,6 +348,12 @@ class StartScreen:
         tk.Label(self.frame, text="Player 2 Agent:").pack()
         tk.OptionMenu(self.frame, self.agent2_var, *AGENT_OPTIONS).pack()
 
+        # Slider to change AI speed
+        tk.Label(self.frame, text="AI Speed (ms delay):").pack()
+        self.speed_var = tk.IntVar(value=1000)
+        tk.Scale(self.frame, from_=100, to=2000, resolution=100,
+                orient=tk.HORIZONTAL, variable=self.speed_var).pack(pady=5)
+
         tk.Button(self.frame, text="Start Game", command=self.start_game).pack(pady=20)
 
     def start_game(self):
@@ -341,6 +364,5 @@ class StartScreen:
 
 # TO DO
 # AI agents play slower?
-# Make dropdown menu in startscreen clearer that it's dropdown
 
 
