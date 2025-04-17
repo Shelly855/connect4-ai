@@ -1,8 +1,57 @@
-Python VS Code Extension
+# Connect 4 – Terminal Version
 
-## Additional Packages
+This is the **final GUI version** of the Connect 4 game, with a visual interface built with `tkinter`.
 
-pip install numpy matplotlib scikit-learn pandas
+### Supported Modes
+
+- Human vs Human
+- Human vs AI (Random, Smart, Minimax, Basic ML, Minimax-Trained ML)
+- AI vs AI
+
+You can adjust the AI speed during the game, and toggle visibility of the minimax game tree (if minimax agent is playing).
+
+---
+
+## Requirements
+
+- Python 3.10 or later
+- Recommended: VS Code with the Python extension
+- `scikit-learn` (required for ML agents)
+
+> Install with:
+>
+> ```bash
+> pip install scikit-learn
+> ```
+
+## How to Run
+
+1. Open a terminal in this project folder.
+2. Run the script with:
+   ```bash
+   python game.py
+   ```
+3. Use the dropdowns to choose agents, adjust speed, and start the game.
+
+---
+
+## Files
+
+- `game.py` – Core game and AI logic (also launches GUI)
+- `connect4_gui.py` - Handles the GUI and game interactions
+- `config.py` - Board dimensions, colours, and player tokens
+- `ml_agent.pkl` – ML model trained using real game data (UCI dataset)
+- `ml_agent_minimax.pkl` – ML model trained using data generated from the minimax algorithm
+
+---
+
+## Notes
+
+- You can reset or restart the game at any time via the sidebar.
+- Speed slider affects how quickly AI agents make their moves.
+- If a minimax agent is selected, the minimax game tree is automatically generated and viewable.
+
+---
 
 ## References
 
