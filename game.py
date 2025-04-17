@@ -354,8 +354,17 @@ if __name__ == "__main__":
         agent1_type = AGENT_MAP.get(agent1_name, "human")
         agent2_type = AGENT_MAP.get(agent2_name, "human")
 
-        agent1_model = basic_ml_model if agent1_type == "ml" else None
-        agent2_model = minimax_ml_model if agent2_type == "minimax_ml" else None
+        agent1_model = (
+            basic_ml_model if agent1_type == "ml"
+            else minimax_ml_model if agent1_type == "minimax_ml"
+            else None
+        )
+
+        agent2_model = (
+            basic_ml_model if agent2_type == "ml"
+            else minimax_ml_model if agent2_type == "minimax_ml"
+            else None
+        )
 
         Connect4GUI(agent1_type, agent2_type, agent1_model, agent2_model)
 
