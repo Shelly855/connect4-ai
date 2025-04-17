@@ -52,34 +52,39 @@ class Connect4GUI:
         self.status_label = tk.Label(self.sidebar, text="", font=("Helvetica", 14))
         self.status_label.pack(pady=10)
 
-        # Speed slider
-        tk.Label(self.sidebar, text="AI Speed (ms):").pack(pady=(10, 0))
-
-        self.speed_slider = tk.Scale(
-            self.sidebar,
-            from_=100, to=2000, # range in ms
-            resolution=100,
-            orient=tk.HORIZONTAL
-        )
-        self.speed_slider.set(1000) # default
-        self.speed_slider.pack()
-
         # Shows whose turn it is
         self.turn_label = tk.Label(self.sidebar, text="", font=("Helvetica", 12))
         self.turn_label.pack(pady=5)
         self.update_turn_label()
 
+        # Speed slider
+        speed_frame = tk.LabelFrame(self.sidebar, text="AI Speed (ms):")
+        speed_frame.pack(pady=10, fill=tk.X, padx=10)
+
+        self.speed_slider = tk.Scale(
+            speed_frame,
+            from_=100,
+            to=2000,
+            resolution=100,
+            orient=tk.HORIZONTAL
+        )
+        self.speed_slider.set(1000) # default
+        self.speed_slider.pack(padx=10)
+
+        button_frame = tk.Frame(self.sidebar)
+        button_frame.pack(pady=10)
+
         # Clears board but agents stay the same
         self.reset_button = tk.Button(
-            self.sidebar,
+            button_frame,
             text="Reset Game",
             command=self.reset_board
         )
-        self.reset_button.pack(pady=10)
+        self.reset_button.pack(pady=5)
 
         # Returns to agent options
         self.new_game_button = tk.Button(
-            self.sidebar,
+            button_frame,
             text="New Game",
             command=self.return_to_start
         )
