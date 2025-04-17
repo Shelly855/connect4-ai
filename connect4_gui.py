@@ -3,7 +3,19 @@ from config import ROW_COUNT, COLUMN_COUNT, PLAYER_1_COLOUR, PLAYER_2_COLOUR, DR
 from game import Connect4
 import math
 
+
 class Connect4GUI:
+
+    # Formatting agent types for labels
+    AGENT_DISPLAY_NAMES = {
+        "human": "Human",
+        "random": "Random Agent",
+        "smart": "Smart Agent",
+        "minimax": "Minimax Agent",
+        "ml": "ML Agent",
+        "minimax_ml": "Minimax-Trained ML Agent"
+    }
+
     def __init__(self, agent1_type, agent2_type, agent1_model=None, agent2_model=None):
         self.turn = 0
 
@@ -175,8 +187,13 @@ class Connect4GUI:
         if self.game.check_winner(current_player):
             self.canvas.unbind("<Button-1>")
             player_number = "1" if current_player == self.game.PLAYER_1 else "2"
+            agent_type = self.game.agent1_type if player_number == "1" else self.game.agent2_type
             colour = PLAYER_1_COLOUR if player_number == "1" else PLAYER_2_COLOUR
-            self.status_label.config(text=f"Player {player_number} wins!", fg=colour)
+
+            # For formatting agent names
+            agent_display = self.AGENT_DISPLAY_NAMES.get(agent_type, agent_type)
+
+            self.status_label.config(text=f"Player {player_number} ({agent_display}) wins!", fg=colour)
             self.turn_label.config(text="") # clear turn label
             return
 
@@ -195,9 +212,22 @@ class Connect4GUI:
             self.root.after(500, self.play_turn)
 
     def update_turn_label(self):
-        current_player = "Player 1" if self.turn % 2 == 0 else "Player 2"
-        colour = PLAYER_1_COLOUR if self.turn % 2 == 0 else PLAYER_2_COLOUR
-        self.turn_label.config(text=f"{current_player}'s turn", fg=colour)
+        if self.turn % 2 == 0:
+            current_player = "Player 1"
+            agent_type = self.game.agent1_type
+            colour = PLAYER_1_COLOUR
+        else:
+            current_player = "Player 2"
+            agent_type = self.game.agent2_type
+            colour = PLAYER_2_COLOUR
+
+        # For formatting agent name
+        agent_display = self.AGENT_DISPLAY_NAMES.get(agent_type, agent_type)
+
+        self.turn_label.config(
+            text=f"{current_player} ({agent_display})'s turn",
+            fg=colour
+        )
 
     def reset_board(self):
         self.turn = 0
