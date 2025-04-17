@@ -323,6 +323,8 @@ class StartScreen:
         self.agent1_var = tk.StringVar(value=AGENT_OPTIONS[0])
         self.agent2_var = tk.StringVar(value=AGENT_OPTIONS[0])
 
+        tk.Label(self.frame, text="Select agents from the dropdowns below").pack(pady=(0, 10))
+
         tk.Label(self.frame, text="Player 1 Agent:").pack()
         tk.OptionMenu(self.frame, self.agent1_var, *AGENT_OPTIONS).pack()
 
