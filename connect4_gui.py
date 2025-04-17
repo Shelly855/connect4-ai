@@ -340,19 +340,38 @@ class StartScreen:
         self.agent1_var = tk.StringVar(value=AGENT_OPTIONS[0])
         self.agent2_var = tk.StringVar(value=AGENT_OPTIONS[0])
 
-        tk.Label(self.frame, text="Select agents from the dropdowns below").pack(pady=(0, 10))
+        agent_frame = tk.LabelFrame(self.frame, text="Choose Agents", labelanchor="n", padx=10, pady=10)
+        agent_frame.pack(pady=(10, 0))
 
-        tk.Label(self.frame, text="Player 1 Agent:").pack()
-        tk.OptionMenu(self.frame, self.agent1_var, *AGENT_OPTIONS).pack()
+        tk.Label(agent_frame, text="Player 1 Agent:").pack(anchor="w")
+        agent1_menu = tk.OptionMenu(agent_frame, self.agent1_var, *AGENT_OPTIONS)
+        agent1_menu.config(width=24)
+        agent1_menu.pack()
 
-        tk.Label(self.frame, text="Player 2 Agent:").pack()
-        tk.OptionMenu(self.frame, self.agent2_var, *AGENT_OPTIONS).pack()
+        tk.Label(agent_frame, text="Player 2 Agent:").pack(anchor="w", pady=(5, 0))
+        agent2_menu = tk.OptionMenu(agent_frame, self.agent2_var, *AGENT_OPTIONS)
+        agent2_menu.config(width=24)
+        agent2_menu.pack()
+
+        # Horizontal separator
+        tk.Frame(self.frame, height=2, bd=1, relief=tk.SUNKEN).pack(fill="x", pady=10)
 
         # Slider to change AI speed
-        tk.Label(self.frame, text="AI Speed (ms delay):").pack()
-        self.speed_var = tk.IntVar(value=1000)
-        tk.Scale(self.frame, from_=100, to=2000, resolution=100,
-                orient=tk.HORIZONTAL, variable=self.speed_var).pack(pady=5)
+        speed_frame = tk.LabelFrame(self.frame, text="AI Speed (ms delay):", labelanchor="n", padx=10, pady=5)
+        speed_frame.pack(pady=(10, 0))
+
+        self.speed_label = tk.Label(speed_frame, text="1000")
+        self.speed_label.pack()
+
+        self.speed_slider = tk.Scale(
+            speed_frame,
+            from_=2000, to=0, resolution=100,
+            orient=tk.HORIZONTAL,
+            length=150,
+            command=lambda val: self.speed_label.config(text=val)
+        )
+        self.speed_slider.set(1000)
+        self.speed_slider.pack()
 
         tk.Button(self.frame, text="Start Game", command=self.start_game).pack(pady=20)
 
@@ -361,8 +380,5 @@ class StartScreen:
         agent2 = self.agent2_var.get()
         self.root.withdraw()
         self.start_callback(agent1, agent2)
-
-# TO DO
-# AI agents play slower?
 
 
