@@ -43,8 +43,9 @@ class Connect4GUI:
         self.draw_board()
 
         # Right side: Sidebar for status labels, turn label, minimax tree
-        self.sidebar = tk.Frame(self.main_frame)
+        self.sidebar = tk.Frame(self.main_frame, width=300) # fixed width (number can be adjusted)
         self.sidebar.pack(side=tk.RIGHT, padx=20, fill=tk.Y)
+        self.sidebar.pack_propagate(False) # stop window resizing
 
         # Shows final outcome
         self.status_label = tk.Label(self.sidebar, text="", font=("Helvetica", 14))
@@ -67,7 +68,7 @@ class Connect4GUI:
             self.instructions_label = tk.Label(
                 self.sidebar,
                 font=("Helvetica", 11),
-                text="If you're a human player, click any column to drop your disc."
+                text="If you're a human player, click\nany column to drop your disc."
             )
             self.instructions_label.pack(pady=10)
 
@@ -193,7 +194,7 @@ class Connect4GUI:
             # For formatting agent names
             agent_display = self.AGENT_DISPLAY_NAMES.get(agent_type, agent_type)
 
-            self.status_label.config(text=f"Player {player_number} ({agent_display}) wins!", fg=colour)
+            self.status_label.config(text=f"Player {player_number}\n({agent_display}) wins!", fg=colour)
             self.turn_label.config(text="") # clear turn label
             return
 
