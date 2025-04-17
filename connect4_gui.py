@@ -16,7 +16,7 @@ class Connect4GUI:
         "minimax_ml": "Minimax-Trained ML Agent"
     }
 
-    def __init__(self, agent1_type, agent2_type, agent1_model=None, agent2_model=None):
+    def __init__(self, agent1_type, agent2_type, agent1_model=None, agent2_model=None, root=None):
         self.turn = 0
 
         self.agent1_type = agent1_type
@@ -25,8 +25,9 @@ class Connect4GUI:
         self.agent2_model = agent2_model
 
         # New window for GUI
-        self.root = tk.Toplevel()
+        self.root = tk.Toplevel(root)
         self.root.title("Connect 4")
+        self.parent_root = root
 
         self.game = Connect4(agent1_type=agent1_type, agent2_type=agent2_type,
                             agent1_model=agent1_model, agent2_model=agent2_model)
@@ -56,12 +57,21 @@ class Connect4GUI:
         self.turn_label.pack(pady=5)
         self.update_turn_label()
 
+        # Clears board but agents stay the same
         self.reset_button = tk.Button(
             self.sidebar,
             text="Reset Game",
             command=self.reset_board
         )
         self.reset_button.pack(pady=10)
+
+        # Returns to agent options
+        self.new_game_button = tk.Button(
+            self.sidebar,
+            text="New Game",
+            command=self.return_to_start
+        )
+        self.new_game_button.pack(pady=5)
 
         # Instructions for human player (only shows if one player is a human)
         if agent1_type == "human" or agent2_type == "human":
@@ -260,6 +270,11 @@ class Connect4GUI:
         if self.agent1_type != "human":
             self.root.after(500, self.play_turn)
 
+    # Show agent options again
+    def return_to_start(self):
+        self.root.destroy()
+        self.parent_root.deiconify()
+
     def refresh_minimax_tree(self):
         if hasattr(self, "tree_output"):
             self.tree_output.delete("1.0", tk.END)
@@ -323,9 +338,7 @@ class StartScreen:
         self.start_callback(agent1, agent2)
 
 # TO DO
-# Restart game after finish and anytime
 # AI agents play slower?
-# Show which type of agent?
 # Make dropdown menu in startscreen clearer that it's dropdown
 
 

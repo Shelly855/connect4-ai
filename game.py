@@ -350,7 +350,7 @@ if __name__ == "__main__":
     basic_ml_model = joblib.load("ml_agent.pkl") # uses dataset from https://archive.ics.uci.edu/dataset/26/connect+4
     minimax_ml_model = joblib.load("ml_agent_minimax.pkl") # uses generated minimax dataset
 
-    def start_game(agent1_name, agent2_name):
+    def start_game(agent1_name, agent2_name, root):
         agent1_type = AGENT_MAP.get(agent1_name, "human")
         agent2_type = AGENT_MAP.get(agent2_name, "human")
 
@@ -366,11 +366,11 @@ if __name__ == "__main__":
             else None
         )
 
-        Connect4GUI(agent1_type, agent2_type, agent1_model, agent2_model)
+        Connect4GUI(agent1_type, agent2_type, agent1_model, agent2_model, root)
 
     root = tk.Tk()
     root.title("Connect 4 Setup")
-    StartScreen(root, start_game)
+    StartScreen(root, lambda a1, a2: start_game(a1, a2, root))
     root.mainloop()
 
 
