@@ -291,7 +291,6 @@ class Connect4GUI:
             delay = self.speed_slider.get() if hasattr(self, "speed_slider") else 1000
             self.root.after(delay, self.play_turn)
 
-
     # Show agent options again
     def return_to_start(self):
         self.root.destroy()
@@ -320,7 +319,6 @@ class Connect4GUI:
                     self.game.PLAYER_2,
                     self.tree_output
                 )
-
 
 AGENT_OPTIONS = [
     "Human",

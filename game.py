@@ -13,8 +13,8 @@ class Connect4:
     PLAYER_2 = "○"
 
     # Initialise a 6-row by 7-column empty board as a nested list:
-    # - Inner loop (for _ in range(7)) creates a row of 7 spaces
-    # - Outer loop (for _ in range(6)) repeats this process for 6 rows
+    # - Inner loop (for _ in range(COLUMN_COUNT)) creates a row of 7 spaces
+    # - Outer loop (for _ in range(ROW_COUNT)) repeats this process for 6 rows
     # 'self' = instance of the class, allowing access to its attributes & methods
     def __init__(self, agent1_type="human", agent2_type="ml", agent1_model=None, agent2_model=None):
         self.board = [[" " for _ in range(COLUMN_COUNT)] for _ in range(ROW_COUNT)]
@@ -22,6 +22,16 @@ class Connect4:
         self.agent2_type = agent2_type
         self.agent1_model = agent1_model # model used by Player 1 if agent1 is ML
         self.agent2_model = agent2_model # model used by Player 2 if agent2 is ML
+
+        # Used for minimax performance evaluation
+        self.nodes_expanded = 0
+        self.search_depth_used = 0
+
+        # Branching factor = number of valid moves available at a given decision point (used for performance evaluation)
+        self.branching_factors = []
+
+        # Will store score difference for each minimax move
+        self.heuristic_deltas = []
 
     def drop_disc(self, column, player_symbol):
         row = self.get_lowest_empty_row(column)
@@ -43,13 +53,13 @@ class Connect4:
                 # Check if this position & the next 3 to the right match the player's symbol
                 # - col + 0: 1st symbol in sequence, col + 1: 2nd symbol, & so on
                 if all(self.board[row][col + i] == player_symbol for i in range(4)):
-                    return True # found 4 in a row - win
+                    return "horizontal" # found 4 in a row - win
                 
         # Check for vertical win |
         for col in range(COLUMN_COUNT):
             for row in range(ROW_COUNT - 3): # only check up to row index 2
                 if all (self.board[row + i][col] == player_symbol for i in range(4)):
-                    return True
+                    return "vertical"
                 
         # Check for diagonal win /
         for row in range(3, ROW_COUNT): # check from rows 3-5 to ensure enough space above for win
@@ -59,7 +69,7 @@ class Connect4:
                 # - row - i moves up (decrease row index)
                 # - col + i moves right (increase column index)
                 if all(self.board[row - i][col + i] == player_symbol for i in range(4)):
-                    return True
+                    return "diagonal"
                 
         # Check for diagonal win \
         for row in range(3, ROW_COUNT):
@@ -69,9 +79,9 @@ class Connect4:
                 # - row - i moves up
                 # - col - i moves left
                 if all(self.board[row - i][col - i] == player_symbol for i in range(4)):
-                    return True
+                    return "diagonal"
         
-        return False # no winner
+        return None # no winner
     
     # Check if draw
     def is_full(self):
@@ -146,7 +156,14 @@ class Connect4:
     #   https://www.youtube.com/watch?v=rbmk1qtVEmg
     def minimax_agent(self, alpha, beta, maximising_player, depth):
 
-        valid_moves = [col for col in range(COLUMN_COUNT) if self.is_valid_move(col)] #fFind all columns where move is possible (not full)
+        # Used for performance evaluation
+        self.search_depth_used = max(self.search_depth_used, depth)
+        self.nodes_expanded += 1
+
+        valid_moves = [col for col in range(COLUMN_COUNT) if self.is_valid_move(col)] # find all columns where move is possible (not full)
+
+        # Track branching factor
+        self.branching_factors.append(len(valid_moves))
 
         # Move-ordering - sort moves (centre first)
         priority_order = [3, 2, 4, 1, 5, 0, 6] # 3 = index 0 (best)
@@ -206,7 +223,25 @@ class Connect4:
     # AI chooses best move using minimax
     def minimax_agent_move(self):
         best_move, _ = self.minimax_agent(-math.inf, math.inf, True, 3)
-        return best_move if best_move is not None else self.random_agent()
+
+        if best_move is not None:
+            # Score before move
+            score_before = self.evaluate_board(self.PLAYER_2)
+
+            row = self.get_lowest_empty_row(best_move)
+            self.board[row][best_move] = self.PLAYER_2
+
+            # Score after move
+            score_after = self.evaluate_board(self.PLAYER_2)
+            delta = score_after - score_before
+
+            self.heuristic_deltas.append(delta)
+
+            self.board[row][best_move] = " "  # undo
+
+            return best_move
+        return self.random_agent()
+
             
     # AI chooses random move
     def random_agent(self):
@@ -225,7 +260,7 @@ class Connect4:
                 if row is not None:
                     self.board[row][col] = player_symbol # place disc temporarily
                     if self.check_winner(player_symbol):
-                        self.board[row][col] = " " # Uudo move
+                        self.board[row][col] = " " # undo move
                         return col # winning column
                     self.board[row][col] = " "
         return None # no winning move
@@ -378,3 +413,9 @@ if __name__ == "__main__":
 # Consistent comment capitals
 # More comments
 # Add citations used
+# Close game from main game screen
+# Add markdown to evaluation jupyter notebook
+# README for evaluation repo
+# Add evaluation repo link to main README
+# Performance evaluation in game repo README - psutil package
+# Vid presentation
