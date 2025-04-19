@@ -42,7 +42,9 @@ You can adjust the AI speed during the game, and toggle visibility of the minima
 - `config.py` - Board dimensions, colours, and player tokens
 - `ml_agent.pkl` – ML model trained using real game data (UCI dataset)
 - `ml_agent_minimax.pkl` – ML model trained using data generated from the minimax algorithm
-
+- `performance_evaluation.py` – Simulates games between agents and collects performance data across 500+ matches
+- `game_results.csv` – Raw results from each simulated game (e.g. winner, execution time, nodes expanded, etc.)
+  
 ---
 
 ## Notes
