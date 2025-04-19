@@ -8,8 +8,6 @@ This is the **final GUI version** of the Connect 4 game, with a visual interface
 - Human vs AI (Random, Smart, Minimax, Basic ML, Minimax-Trained ML)
 - AI vs AI
 
-You can adjust the AI speed during the game, and toggle visibility of the minimax game tree (if minimax agent is playing).
-
 ---
 
 ## Requirements
@@ -31,7 +29,7 @@ You can adjust the AI speed during the game, and toggle visibility of the minima
    ```bash
    python game.py
    ```
-3. Use the dropdowns to choose agents, adjust speed, and start the game.
+3. Use the dropdowns to choose agents and start the game.
 
 ---
 
