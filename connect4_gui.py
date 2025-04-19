@@ -29,6 +29,9 @@ class Connect4GUI:
         self.root.title("Connect 4")
         self.parent_root = root
 
+        # Exit cleanly when users close window using x button
+        self.root.protocol("WM_DELETE_WINDOW", self.exit_game)
+
         self.game = Connect4(agent1_type=agent1_type, agent2_type=agent2_type,
                             agent1_model=agent1_model, agent2_model=agent2_model)
 
@@ -71,25 +74,6 @@ class Connect4GUI:
         self.speed_slider.set(1000) # default
         self.speed_slider.pack(padx=10)
 
-        button_frame = tk.Frame(self.sidebar)
-        button_frame.pack(pady=10)
-
-        # Clears board but agents stay the same
-        self.reset_button = tk.Button(
-            button_frame,
-            text="Reset Game",
-            command=self.reset_board
-        )
-        self.reset_button.pack(pady=5)
-
-        # Returns to agent options
-        self.new_game_button = tk.Button(
-            button_frame,
-            text="New Game",
-            command=self.return_to_start
-        )
-        self.new_game_button.pack(pady=5)
-
         # Instructions for human player (only shows if one player is a human)
         if agent1_type == "human" or agent2_type == "human":
             self.instructions_label = tk.Label(
@@ -98,6 +82,32 @@ class Connect4GUI:
                 text="If you're a human player, click\nany column to drop your disc."
             )
             self.instructions_label.pack(pady=10)
+
+        button_frame = tk.Frame(self.sidebar)
+        button_frame.pack(pady=10)
+
+        # Clear board but agents stay the same
+        self.reset_button = tk.Button(
+            button_frame,
+            text="Reset Game",
+            command=self.reset_board
+        )
+        self.reset_button.pack(pady=5)
+
+        # Return to agent options
+        self.new_game_button = tk.Button(
+            button_frame,
+            text="New Game",
+            command=self.return_to_start
+        )
+        self.new_game_button.pack(pady=5)
+
+        self.exit_button = tk.Button(
+            self.sidebar,
+            text="Exit Game",
+            command=self.exit_game
+        )
+        self.exit_button.pack(pady=5)
 
         # If a player is minimax, show minimax tree
         if agent1_type == "minimax" or agent2_type == "minimax":
@@ -241,7 +251,6 @@ class Connect4GUI:
             delay = self.speed_slider.get() if hasattr(self, "speed_slider") else 1000
             self.root.after(delay, self.play_turn)
 
-
     def update_turn_label(self):
         if self.turn % 2 == 0:
             current_player = "Player 1"
@@ -295,6 +304,11 @@ class Connect4GUI:
     def return_to_start(self):
         self.root.destroy()
         self.parent_root.deiconify()
+
+    def exit_game(self):
+        self.root.destroy()
+        if self.parent_root:
+            self.parent_root.destroy()
 
     def refresh_minimax_tree(self):
         if hasattr(self, "tree_output"):

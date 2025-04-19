@@ -413,7 +413,6 @@ if __name__ == "__main__":
 # Consistent comment capitals
 # More comments
 # Add citations used
-# Close game from main game screen
 # Add markdown to evaluation jupyter notebook
 # README for evaluation repo
 # Add evaluation repo link to main README
