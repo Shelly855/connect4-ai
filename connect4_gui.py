@@ -356,26 +356,6 @@ class StartScreen:
         agent2_menu.config(width=24)
         agent2_menu.pack()
 
-        # Horizontal separator
-        tk.Frame(self.frame, height=2, bd=1, relief=tk.SUNKEN).pack(fill="x", pady=10)
-
-        # Slider to change AI speed
-        speed_frame = tk.LabelFrame(self.frame, text="AI Speed (ms delay):", labelanchor="n", padx=10, pady=5)
-        speed_frame.pack(pady=(10, 0))
-
-        self.speed_label = tk.Label(speed_frame, text="1000")
-        self.speed_label.pack()
-
-        self.speed_slider = tk.Scale(
-            speed_frame,
-            from_=2000, to=0, resolution=100,
-            orient=tk.HORIZONTAL,
-            length=150,
-            command=lambda val: self.speed_label.config(text=val)
-        )
-        self.speed_slider.set(1000)
-        self.speed_slider.pack()
-
         tk.Button(self.frame, text="Start Game", command=self.start_game).pack(pady=20)
 
     def start_game(self):
@@ -384,4 +364,4 @@ class StartScreen:
         self.root.withdraw()
         self.start_callback(agent1, agent2)
 
-
+# python game.py
