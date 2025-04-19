@@ -1,4 +1,4 @@
-# Connect 4 – Terminal Version
+# Connect 4
 
 This is the **final GUI version** of the Connect 4 game, with a visual interface built with `tkinter`.
 
@@ -66,3 +66,9 @@ You can adjust the AI speed during the game, and toggle visibility of the minima
 - Connect 4 Dataset
   - https://archive.ics.uci.edu/dataset/26/connect+4
   - Used to train the basic ML agent
+ 
+---
+
+🔗 This folder also has a GitHub repository version, if you'd like to take a look:  
+[github.com/Shelly855/connect-4-ai](https://github.com/Shelly855/connect-4-ai)  
+*(Not required for submission — just for reference.)*
