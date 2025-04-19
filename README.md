@@ -69,6 +69,6 @@ You can adjust the AI speed during the game, and toggle visibility of the minima
  
 ---
 
-🔗 This folder also has a GitHub repository version, if you'd like to take a look:  
-[github.com/Shelly855/connect-4-ai](https://github.com/Shelly855/connect-4-ai)  
-*(Not required for submission — just for reference.)*
+This folder also has a GitHub repository version, if you'd like to take a look:  
+[github.com/Shelly855/connect-4-terminal](https://github.com/Shelly855/connect-4-terminal)
+*This link is optional and not required for marking. The GitHub version may be updated after submission.*
