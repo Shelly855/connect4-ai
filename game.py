@@ -6,7 +6,7 @@
 import random
 import math
 import tkinter as tk
-from config import ROW_COUNT, COLUMN_COUNT, PLAYER_1_COLOUR, PLAYER_2_COLOUR
+from config import ROW_COUNT, COLUMN_COUNT, SEARCH_DEPTH
 
 class Connect4:
     PLAYER_1 = "●"
@@ -124,23 +124,23 @@ class Connect4:
         score = 0
         opponent_count = window.count(opponent_symbol)
         player_count = window.count(player_symbol)
-        empty_count = window.count(" ") # empty spaces in board
+        empty_count = window.count(" ")
 
         # Penalises positions that are strong for opponent
         if opponent_count == 4: # opponent wins - bad position
-            score -= 100
+            score -= 100000
         elif opponent_count == 3 and empty_count == 1: # opponent nearly winning - needs blocking
-            score -= 10
+            score -= 100
         elif opponent_count == 2 and empty_count == 2: # opponent potentially winning
-            score -= 1
+            score -= 10
 
         # Rewards positions that help player win
         if player_count == 4: # player wins
-            score += 100
+            score += 100000
         elif player_count == 3 and empty_count == 1: # player nearly winning - good position
-            score += 10
+            score += 120
         elif player_count == 2 and empty_count == 2:
-            score += 1
+            score += 10
 
         # High score = strong position for player
         # Low/negative score = strong position for opponent
@@ -154,13 +154,22 @@ class Connect4:
 
     # === Reference for alpha beta pruning: Science Buddies YouTube tutorial on minimax with alpha-beta pruning ===
     #   https://www.youtube.com/watch?v=rbmk1qtVEmg
-    def minimax_agent(self, alpha, beta, maximising_player, depth):
+    def minimax_agent(self, alpha, beta, maximising_player, depth, ai_symbol):
 
         # Used for performance evaluation
         self.search_depth_used = max(self.search_depth_used, depth)
         self.nodes_expanded += 1
 
         valid_moves = [col for col in range(COLUMN_COUNT) if self.is_valid_move(col)] # find all columns where move is possible (not full)
+
+        opponent_symbol = (
+                self.PLAYER_1 if ai_symbol == self.PLAYER_2 else self.PLAYER_2
+            )
+
+        if self.check_winner(ai_symbol):
+            return None, float('inf')  # AI wins
+        elif self.check_winner(opponent_symbol):
+            return None, float('-inf')  # opponent wins
 
         # Track branching factor
         self.branching_factors.append(len(valid_moves))
@@ -175,15 +184,15 @@ class Connect4:
 
         # Stop search if AI searched deep enough or board full
         if depth == 0 or self.is_full():
-            return None, self.evaluate_board(self.PLAYER_2) # none because it's an evaluation, not selecting a move
+            return None, self.evaluate_board(ai_symbol) # none because it's an evaluation, not selecting a move
         
         if maximising_player:
             best_score = float('-inf') # start off as negative infinity because AI wants highest possible score
             best_move = None
             for col in valid_moves:
                 row = self.get_lowest_empty_row(col)
-                self.board[row][col] = self.PLAYER_2 # AI makes move (place disc in lowest available row)
-                _, score = self.minimax_agent(alpha, beta, False, depth - 1) # simulate to see how opponent would respond
+                self.board[row][col] = ai_symbol # AI makes move (place disc in lowest available row)
+                _, score = self.minimax_agent(alpha, beta, False, depth - 1, ai_symbol) # simulate to see how opponent would respond
                 self.board[row][col] = " " # undo move so to not change the real
 
                 # If this move gives higher score than best score
@@ -205,8 +214,8 @@ class Connect4:
             # Tries every possible move for opponent (PLAYER_1)
             for col in valid_moves:
                 row = self.get_lowest_empty_row(col)
-                self.board[row][col] = self.PLAYER_1 # opponent makes move
-                _, score = self.minimax_agent(alpha, beta, True, depth - 1) # simulate AI's response
+                self.board[row][col] = opponent_symbol # opponent makes move
+                _, score = self.minimax_agent(alpha, beta, True, depth - 1, ai_symbol) # simulate AI's response
                 self.board[row][col] = " "
 
                 # Opponent chooses move that lowest AI's score the most
@@ -221,20 +230,18 @@ class Connect4:
             return best_move, best_score
         
     # AI chooses best move using minimax
-    def minimax_agent_move(self):
-        best_move, _ = self.minimax_agent(-math.inf, math.inf, True, 3)
+    def minimax_agent_move(self, ai_symbol):
+        best_move, _ = self.minimax_agent(-math.inf, math.inf, True, SEARCH_DEPTH, ai_symbol)
 
         if best_move is not None:
-            # Score before move
-            score_before = self.evaluate_board(self.PLAYER_2)
+            score_before = self.evaluate_board(ai_symbol)
 
             row = self.get_lowest_empty_row(best_move)
-            self.board[row][best_move] = self.PLAYER_2
+            self.board[row][best_move] = ai_symbol
 
             # Score after move
-            score_after = self.evaluate_board(self.PLAYER_2)
+            score_after = self.evaluate_board(ai_symbol)
             delta = score_after - score_before
-
             self.heuristic_deltas.append(delta)
 
             self.board[row][best_move] = " "  # undo
@@ -321,7 +328,7 @@ class Connect4:
         if depth == 0 or not valid_moves:
             score = self.evaluate_board(player_symbol)
             output_widget.insert(tk.END, f"{indent_str}└── Score: {score}\n")
-            return score
+            return None, score
 
         best_score = -math.inf if maximising_player else math.inf
         best_move = None
@@ -337,7 +344,11 @@ class Connect4:
             move_label = "Max" if maximising_player else "Min"
             output_widget.insert(tk.END, f"{indent_str}├── Column {col} ({move_label}, {current_symbol})\n")
 
-            score = self._print_tree_recursive(board_state, depth - 1, not maximising_player, indent + 1, alpha, beta, player_symbol, output_widget)
+            next_symbol = (
+                self.PLAYER_1 if current_symbol == self.PLAYER_2 else self.PLAYER_2
+            )
+
+            _, score = self._print_tree_recursive(board_state, depth - 1, not maximising_player, indent + 1, alpha, beta, next_symbol, output_widget)
             board_state[row][col] = " " # undo move
 
             if maximising_player:
@@ -357,7 +368,7 @@ class Connect4:
 
         if indent == 0:
             output_widget.insert(tk.END, f"\nBest opening move: Column {best_move} with score {best_score}\n")
-        return best_score
+        return best_move, best_score
 
     def _simulate_drop(self, board, column, symbol):
         for row in range(ROW_COUNT - 1, -1, -1):
@@ -413,8 +424,5 @@ if __name__ == "__main__":
 # Consistent comment capitals
 # More comments
 # Add citations used
-# Add markdown to evaluation jupyter notebook
-# README for evaluation repo
-# Add evaluation repo link to main README
-# Performance evaluation in game repo README - psutil package
 # Vid presentation
+# Make repositories public
