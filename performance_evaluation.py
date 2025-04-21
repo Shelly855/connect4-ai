@@ -13,16 +13,17 @@ minimax_ml_model = joblib.load("ml_agent_minimax.pkl")
 def simulate_match(agent1_type, agent2_type, agent1_model=None, agent2_model=None, games=500):
     all_game_data = []
 
+    # Simulate multiple games between the two agents
     for _ in range(games):
         game = Connect4(agent1_type, agent2_type, agent1_model, agent2_model)
+
+        # Track turn order and outcome
         current_symbol = game.PLAYER_1
         turns = 0
         winner = "draw"
-
-        # Each game starts with no win type - changes to type of win when a player wins
         win_type = None
 
-        # Timing metrics
+        # Timing and move count metrics
         total_time_agent1 = 0
         total_time_agent2 = 0
         move_count_agent1 = 0
@@ -36,13 +37,14 @@ def simulate_match(agent1_type, agent2_type, agent1_model=None, agent2_model=Non
                 agent_type = agent2_type
                 model = agent2_model
 
-            # Reset counters
+            # Reset metrics for minimax-specific tracking
             if agent_type == "minimax":
                 game.nodes_expanded = 0
                 game.search_depth_used = 0
                 game.branching_factors = []
                 game.heuristic_deltas = []
 
+            # Time the agent's move
             start_time = time.perf_counter()
 
             if agent_type == "random":
@@ -82,6 +84,7 @@ def simulate_match(agent1_type, agent2_type, agent1_model=None, agent2_model=Non
 
             current_symbol = game.PLAYER_2 if current_symbol == game.PLAYER_1 else game.PLAYER_1
 
+        # Post-game metrics
         # After game ends - calculate metrics
         avg_time_agent1 = total_time_agent1 / move_count_agent1 if move_count_agent1 > 0 else 0
         avg_time_agent2 = total_time_agent2 / move_count_agent2 if move_count_agent2 > 0 else 0

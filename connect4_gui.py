@@ -109,7 +109,6 @@ class Connect4GUI:
         )
         self.exit_button.pack(pady=5)
 
-
         if agent1_type == "minimax" or agent2_type == "minimax":
             self.expand_button = tk.Button(
                 self.sidebar,
@@ -118,69 +117,11 @@ class Connect4GUI:
             )
             self.expand_button.pack(pady=(10, 0))
 
-        # If a player is minimax, show minimax tree
-        # if agent1_type == "minimax" or agent2_type == "minimax":
-        #     self.tree_visible = tk.BooleanVar(value=True)
-
-        #     # Button to show or hide tree
-        #     self.toggle_button = tk.Button(
-        #         self.sidebar,
-        #         text="Hide Minimax Tree",
-        #         command=self.toggle_tree
-        #     )
-        #     self.toggle_button.pack(pady=(10, 0))
-
-        #     self.expand_button = tk.Button(
-        #         self.sidebar,
-        #         text="Open Full Tree Window",
-        #         command=self.open_tree_in_new_window
-        #     )
-        #     self.expand_button.pack(pady=(5, 10))
-
-        #     # For tree label + text
-        #     self.tree_container = tk.Frame(self.sidebar)
-        #     self.tree_container.pack(pady=10)
-
-        #     # Game tree title
-        #     self.tree_label = tk.Label(self.tree_container, text="Minimax Game Tree", font=("Helvetica", 14, "bold"))
-        #     self.tree_label.pack()
-
-        #     # Holds text widget + scrollbar
-        #     self.tree_frame = tk.Frame(self.tree_container)
-        #     self.tree_frame.pack()
-
-        #     scrollbar = tk.Scrollbar(self.tree_frame)
-        #     scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-
-        #     # Text widget
-        #     self.tree_output = tk.Text(
-        #         self.tree_frame,
-        #         height=20,
-        #         width=50,
-        #         font=("Courier", 10),
-        #         yscrollcommand=scrollbar.set
-        #     )
-        #     self.tree_output.pack(side=tk.LEFT)
-
-        #     # Link scrollbar to text
-        #     scrollbar.config(command=self.tree_output.yview)
-
-        #     self.refresh_minimax_tree()
-
         # If Player 1 is AI, autostart after main game screen appears
         first_agent = agent1_type
         if first_agent != "human":
             delay = self.speed_slider.get() if hasattr(self, "speed_slider") else 1000
             self.root.after(delay, self.play_turn)
-
-    def toggle_tree(self):
-        if self.tree_visible.get():
-            self.tree_container.pack_forget()
-            self.toggle_button.config(text="Show Minimax Tree")
-        else:
-            self.tree_container.pack()
-            self.toggle_button.config(text="Hide Minimax Tree")
-        self.tree_visible.set(not self.tree_visible.get())
 
     def draw_board(self):
         for row in range(ROW_COUNT):
@@ -223,11 +164,9 @@ class Connect4GUI:
             if agent_type == "random":
                 col = self.game.random_agent()
             elif agent_type == "smart":
-                col = self.game.smart_agent()
+                col = self.game.smart_agent(current_player)
             elif agent_type == "minimax":
                 col = self.game.minimax_agent_move(current_player)
-                # ai_symbol = self.game.PLAYER_1 if current_player == self.game.PLAYER_1 else self.game.PLAYER_2
-                # col = self.game.minimax_agent_move(ai_symbol)
             elif agent_type in ("ml", "minimax_ml"):
                 col = self.game.ml_agent_predict(model)
             else:
@@ -237,6 +176,7 @@ class Connect4GUI:
         if col is None or not self.game.is_valid_move(col):
             return
         
+        # Execute valid move
         row = self.game.get_lowest_empty_row(col)
         self.game.drop_disc(col, current_player)
         self.update_disc(row, col, current_player)
@@ -254,6 +194,7 @@ class Connect4GUI:
             self.turn_label.config(text="") # clear turn label
             return
 
+        # Check for draw
         if self.game.is_full():
             self.status_label.config(text="It's a draw!", fg=DRAW_COLOUR)
             self.turn_label.config(text="")
@@ -332,12 +273,13 @@ class Connect4GUI:
         if hasattr(self, "tree_output"):
             self.tree_output.delete("1.0", tk.END)
 
-            # Generate + display their game tree if player 1 = minimax
+            # Generate + display their game tree
             if self.agent1_type == "minimax":
                 self.tree_output.insert(tk.END, "\n=== Player 1 Minimax Tree ===\n\n")
                 best_move, _ = self.game._print_tree_recursive(
                     self.game.board, # board_state
-                    SEARCH_DEPTH, True, 0, # maximising_player, indent
+                    SEARCH_DEPTH, 
+                    True, 0, # maximising_player, indent
                     -math.inf, math.inf,
                     self.game.PLAYER_1, # player_symbol
                     self.tree_output
@@ -356,6 +298,7 @@ class Connect4GUI:
         new_win = tk.Toplevel(self.root)
         new_win.title("Full Minimax Tree")
 
+        # Build the text area with a scrollbar
         text_frame = tk.Frame(new_win)
         text_frame.pack(fill=tk.BOTH, expand=True)
 
@@ -370,6 +313,7 @@ class Connect4GUI:
         text_widget.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         scrollbar.config(command=text_widget.yview)
 
+        # Updates text box with the latest minimax tree(s)
         def refresh_tree_contents():
             text_widget.delete("1.0", tk.END)
             text_widget.insert(tk.END, f"Turn {self.turn + 1} — Current Player: {'Player 1' if self.turn % 2 == 0 else 'Player 2'}\n\n")
@@ -388,7 +332,7 @@ class Connect4GUI:
                     -math.inf, math.inf, self.game.PLAYER_2, text_widget
                 )
 
-        # Jump to player_num's tree, instead of having to scroll
+        # Scrolls straight to the selected player's tree
         def jump_to_player(player_num):
             tag = f"=== Player {player_num} Minimax Tree ==="
             index = text_widget.search(tag, "1.0", tk.END)
@@ -408,8 +352,8 @@ class Connect4GUI:
         if self.agent2_type == "minimax":
             tk.Button(button_frame, text="Jump to Player 2", command=lambda: jump_to_player(2)).pack(side=tk.LEFT, padx=5)
 
+        # Show tree right away when the window opens
         refresh_tree_contents()
-
 
 AGENT_OPTIONS = [
     "Human",
@@ -431,6 +375,7 @@ class StartScreen:
 
         tk.Label(self.frame, text="Connect 4", font=("Helvetica", 24)).pack(pady=10)
 
+        # Dropdown selections for each player's agent type
         self.agent1_var = tk.StringVar(value=AGENT_OPTIONS[0])
         self.agent2_var = tk.StringVar(value=AGENT_OPTIONS[0])
 
@@ -447,6 +392,7 @@ class StartScreen:
         agent2_menu.config(width=24)
         agent2_menu.pack()
 
+        # Start button that launches game with selected agents
         tk.Button(self.frame, text="Start Game", command=self.start_game).pack(pady=20)
 
     def start_game(self):
@@ -454,5 +400,3 @@ class StartScreen:
         agent2 = self.agent2_var.get()
         self.root.withdraw()
         self.start_callback(agent1, agent2)
-
-# python game.py
