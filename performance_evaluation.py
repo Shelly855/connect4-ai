@@ -50,7 +50,7 @@ def simulate_match(agent1_type, agent2_type, agent1_model=None, agent2_model=Non
             elif agent_type == "smart":
                 move = game.smart_agent()
             elif agent_type == "minimax":
-                move = game.minimax_agent_move()
+                move = game.minimax_agent_move(current_symbol)
             elif agent_type in ("ml", "minimax_ml"):
                 move = game.ml_agent_predict(model)
             else:

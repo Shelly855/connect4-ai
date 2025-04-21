@@ -147,7 +147,7 @@ class Connect4:
         # Will choose move that maximises this
         return score
     
-    # maximising_player - True if AI's turn, False if opponent's turn
+    # maximising_player - True if current player's turn, False if opponent's turn
     # Depth - controls how many moves ahead the AI looks
     # alpha = -∞ (worst possible start for maximising)
     # beta = ∞ (worst possible start for minimising)
@@ -167,24 +167,22 @@ class Connect4:
             )
 
         if self.check_winner(ai_symbol):
-            return None, float('inf')  # AI wins
+            return None, float('inf')  # player wins
         elif self.check_winner(opponent_symbol):
             return None, float('-inf')  # opponent wins
 
         # Track branching factor
         self.branching_factors.append(len(valid_moves))
 
-        # Move-ordering - sort moves (centre first)
-        priority_order = [3, 2, 4, 1, 5, 0, 6] # 3 = index 0 (best)
+        # Sort moves (centre first)
+        priority_order = [3, 2, 4, 1, 5, 0, 6]
 
         # Sort valid moves based on position in priority_order list
-        # lambda col: priority_order.index(col) gives priority ranking for each column
-        # sorted() rearranges valid_moves so centre columns come first
         valid_moves = sorted(valid_moves, key=lambda col: priority_order.index(col))
 
         # Stop search if AI searched deep enough or board full
         if depth == 0 or self.is_full():
-            return None, self.evaluate_board(ai_symbol) # none because it's an evaluation, not selecting a move
+            return None, self.evaluate_board(ai_symbol)
         
         if maximising_player:
             best_score = float('-inf') # start off as negative infinity because AI wants highest possible score
@@ -426,3 +424,4 @@ if __name__ == "__main__":
 # Add citations used
 # Vid presentation
 # Make repositories public
+# Check if AI still assumed as player 2 somewhere
