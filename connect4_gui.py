@@ -1,5 +1,12 @@
 import tkinter as tk
-from config import ROW_COUNT, COLUMN_COUNT, PLAYER_1_COLOUR, PLAYER_2_COLOUR, DRAW_COLOUR, SEARCH_DEPTH
+from config import (
+    ROW_COUNT,
+    COLUMN_COUNT,
+    PLAYER_1_COLOUR,
+    PLAYER_2_COLOUR,
+    DRAW_COLOUR,
+    SEARCH_DEPTH,
+)
 from game import Connect4
 import math
 
@@ -13,10 +20,12 @@ class Connect4GUI:
         "smart": "Smart Agent",
         "minimax": "Minimax Agent",
         "ml": "ML Agent",
-        "minimax_ml": "Minimax-Trained ML Agent"
+        "minimax_ml": "Minimax-Trained ML Agent",
     }
 
-    def __init__(self, agent1_type, agent2_type, agent1_model=None, agent2_model=None, root=None):
+    def __init__(
+        self, agent1_type, agent2_type, agent1_model=None, agent2_model=None, root=None
+    ):
         self.turn = 0
 
         self.agent1_type = agent1_type
@@ -32,8 +41,12 @@ class Connect4GUI:
         # Exit cleanly when users close window using x button
         self.root.protocol("WM_DELETE_WINDOW", self.exit_game)
 
-        self.game = Connect4(agent1_type=agent1_type, agent2_type=agent2_type,
-                            agent1_model=agent1_model, agent2_model=agent2_model)
+        self.game = Connect4(
+            agent1_type=agent1_type,
+            agent2_type=agent2_type,
+            agent1_model=agent1_model,
+            agent2_model=agent2_model,
+        )
 
         self.main_frame = tk.Frame(self.root)
         self.main_frame.pack(padx=20, pady=20)
@@ -47,9 +60,9 @@ class Connect4GUI:
         self.draw_board()
 
         # Right side: Sidebar for status labels, turn label, minimax tree
-        self.sidebar = tk.Frame(self.main_frame, width=300) # fixed width (number can be adjusted)
+        self.sidebar = tk.Frame(self.main_frame, width=300)
         self.sidebar.pack(side=tk.RIGHT, padx=20, fill=tk.Y)
-        self.sidebar.pack_propagate(False) # stop window resizing
+        self.sidebar.pack_propagate(False)  # stop window resizing
 
         # Shows final outcome
         self.status_label = tk.Label(self.sidebar, text="", font=("Helvetica", 14))
@@ -65,13 +78,9 @@ class Connect4GUI:
         speed_frame.pack(pady=10, fill=tk.X, padx=10)
 
         self.speed_slider = tk.Scale(
-            speed_frame,
-            from_=100,
-            to=2000,
-            resolution=100,
-            orient=tk.HORIZONTAL
+            speed_frame, from_=100, to=2000, resolution=100, orient=tk.HORIZONTAL
         )
-        self.speed_slider.set(1000) # default
+        self.speed_slider.set(1000)  # default
         self.speed_slider.pack(padx=10)
 
         # Instructions for human player (only shows if one player is a human)
@@ -79,7 +88,7 @@ class Connect4GUI:
             self.instructions_label = tk.Label(
                 self.sidebar,
                 font=("Helvetica", 11),
-                text="If you're a human player, click\nany column to drop your disc."
+                text="If you're a human player, click\nany column to drop your disc.",
             )
             self.instructions_label.pack(pady=10)
 
@@ -88,24 +97,18 @@ class Connect4GUI:
 
         # Clear board but agents stay the same
         self.reset_button = tk.Button(
-            button_frame,
-            text="Reset Game",
-            command=self.reset_board
+            button_frame, text="Reset Game", command=self.reset_board
         )
         self.reset_button.pack(pady=5)
 
         # Return to agent options
         self.new_game_button = tk.Button(
-            button_frame,
-            text="New Game",
-            command=self.return_to_start
+            button_frame, text="New Game", command=self.return_to_start
         )
         self.new_game_button.pack(pady=5)
 
         self.exit_button = tk.Button(
-            self.sidebar,
-            text="Exit Game",
-            command=self.exit_game
+            self.sidebar, text="Exit Game", command=self.exit_game
         )
         self.exit_button.pack(pady=5)
 
@@ -113,7 +116,7 @@ class Connect4GUI:
             self.expand_button = tk.Button(
                 self.sidebar,
                 text="View Minimax Tree",
-                command=self.open_tree_in_new_window
+                command=self.open_tree_in_new_window,
             )
             self.expand_button.pack(pady=(10, 0))
 
@@ -139,11 +142,13 @@ class Connect4GUI:
 
                 # White circle for disc slots
                 self.canvas.create_oval(
-                    x0+10, y0+10, # inset top left by 10px
-                    x1-10, y1-10, # inset bottom right
-                    fill="white", 
-                    tags=f"cell_{row}_{col}" # so can update later
-                    )
+                    x0 + 10,
+                    y0 + 10,  # inset top left by 10px
+                    x1 - 10,
+                    y1 - 10,  # inset bottom right
+                    fill="white",
+                    tags=f"cell_{row}_{col}",  # so can update later
+                )
 
     # Change colour at (row, col) to match player's move
     def update_disc(self, row, col, symbol):
@@ -155,8 +160,12 @@ class Connect4GUI:
         self.play_turn(col)
 
     def play_turn(self, col=None):
-        current_player = self.game.PLAYER_1 if self.turn % 2 == 0 else self.game.PLAYER_2
-        agent_type = self.game.agent1_type if self.turn % 2 == 0 else self.game.agent2_type
+        current_player = (
+            self.game.PLAYER_1 if self.turn % 2 == 0 else self.game.PLAYER_2
+        )
+        agent_type = (
+            self.game.agent1_type if self.turn % 2 == 0 else self.game.agent2_type
+        )
         model = self.game.agent1_model if self.turn % 2 == 0 else self.game.agent2_model
 
         # If AI's turn & no column manually selected
@@ -175,7 +184,7 @@ class Connect4GUI:
         # Invalid or missing column input
         if col is None or not self.game.is_valid_move(col):
             return
-        
+
         # Execute valid move
         row = self.game.get_lowest_empty_row(col)
         self.game.drop_disc(col, current_player)
@@ -184,14 +193,18 @@ class Connect4GUI:
         if self.game.check_winner(current_player):
             self.canvas.unbind("<Button-1>")
             player_number = "1" if current_player == self.game.PLAYER_1 else "2"
-            agent_type = self.game.agent1_type if player_number == "1" else self.game.agent2_type
+            agent_type = (
+                self.game.agent1_type if player_number == "1" else self.game.agent2_type
+            )
             colour = PLAYER_1_COLOUR if player_number == "1" else PLAYER_2_COLOUR
 
             # For formatting agent names
             agent_display = self.AGENT_DISPLAY_NAMES.get(agent_type, agent_type)
 
-            self.status_label.config(text=f"Player {player_number}\n({agent_display}) wins!", fg=colour)
-            self.turn_label.config(text="") # clear turn label
+            self.status_label.config(
+                text=f"Player {player_number}\n({agent_display}) wins!", fg=colour
+            )
+            self.turn_label.config(text="")  # clear turn label
             return
 
         # Check for draw
@@ -205,7 +218,9 @@ class Connect4GUI:
         self.update_turn_label()
 
         # If next player is AI, play their turn after a delay
-        next_agent = self.game.agent1_type if self.turn % 2 == 0 else self.game.agent2_type
+        next_agent = (
+            self.game.agent1_type if self.turn % 2 == 0 else self.game.agent2_type
+        )
         if next_agent != "human":
             delay = self.speed_slider.get() if hasattr(self, "speed_slider") else 1000
             self.root.after(delay, self.play_turn)
@@ -224,8 +239,7 @@ class Connect4GUI:
         agent_display = self.AGENT_DISPLAY_NAMES.get(agent_type, agent_type)
 
         self.turn_label.config(
-            text=f"{current_player} ({agent_display})'s turn",
-            fg=colour
+            text=f"{current_player} ({agent_display})'s turn", fg=colour
         )
 
     def reset_board(self):
@@ -234,27 +248,27 @@ class Connect4GUI:
             agent1_type=self.agent1_type,
             agent2_type=self.agent2_type,
             agent1_model=self.agent1_model,
-            agent2_model=self.agent2_model
+            agent2_model=self.agent2_model,
         )
 
         # Clear outcome and turn messages
         self.status_label.config(text="")
         self.turn_label.config(text="")
-        
+
         if hasattr(self, "instructions_label"):
-                self.instructions_label.config(
-                    text="If you're a human player, click any column to drop your disc."
-                )
-                self.instructions_label.pack()
+            self.instructions_label.config(
+                text="If you're a human player, click any column to drop your disc."
+            )
+            self.instructions_label.pack()
 
         # Clear and redraw board
         self.canvas.delete("all")
         self.draw_board()
         self.canvas.bind("<Button-1>", self.click_handler)
         self.update_turn_label()
-    
+
         self.refresh_minimax_tree()
-        
+
         if self.agent1_type != "human":
             delay = self.speed_slider.get() if hasattr(self, "speed_slider") else 1000
             self.root.after(delay, self.play_turn)
@@ -277,21 +291,27 @@ class Connect4GUI:
             if self.agent1_type == "minimax":
                 self.tree_output.insert(tk.END, "\n=== Player 1 Minimax Tree ===\n\n")
                 best_move, _ = self.game._print_tree_recursive(
-                    self.game.board, # board_state
-                    SEARCH_DEPTH, 
-                    True, 0, # maximising_player, indent
-                    -math.inf, math.inf,
-                    self.game.PLAYER_1, # player_symbol
-                    self.tree_output
+                    self.game.board,  # board_state
+                    SEARCH_DEPTH,
+                    True,  # maximising_player
+                    0,  # indent
+                    -math.inf,
+                    math.inf,
+                    self.game.PLAYER_1,  # player_symbol
+                    self.tree_output,
                 )
 
             if self.agent2_type == "minimax":
                 self.tree_output.insert(tk.END, "\n=== Player 2 Minimax Tree ===\n\n")
                 best_move, _ = self.game._print_tree_recursive(
-                    self.game.board, SEARCH_DEPTH, True, 0,
-                    -math.inf, math.inf,
+                    self.game.board,
+                    SEARCH_DEPTH,
+                    True,
+                    0,
+                    -math.inf,
+                    math.inf,
                     self.game.PLAYER_2,
-                    self.tree_output
+                    self.tree_output,
                 )
 
     def open_tree_in_new_window(self):
@@ -306,9 +326,7 @@ class Connect4GUI:
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
         text_widget = tk.Text(
-            text_frame, font=("Courier", 10),
-            wrap=tk.NONE,
-            yscrollcommand=scrollbar.set
+            text_frame, font=("Courier", 10), wrap=tk.NONE, yscrollcommand=scrollbar.set
         )
         text_widget.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         scrollbar.config(command=text_widget.yview)
@@ -316,20 +334,35 @@ class Connect4GUI:
         # Updates text box with the latest minimax tree(s)
         def refresh_tree_contents():
             text_widget.delete("1.0", tk.END)
-            text_widget.insert(tk.END, f"Turn {self.turn + 1} — Current Player: {'Player 1' if self.turn % 2 == 0 else 'Player 2'}\n\n")
+            text_widget.insert(
+                tk.END,
+                f"Turn {self.turn + 1} — Current Player: {'Player 1' if self.turn % 2 == 0 else 'Player 2'}\n\n",
+            )
 
             if self.agent1_type == "minimax":
                 text_widget.insert(tk.END, "=== Player 1 Minimax Tree ===\n\n")
                 self.game._print_tree_recursive(
-                    self.game.board, SEARCH_DEPTH, True, 0,
-                    -math.inf, math.inf, self.game.PLAYER_1, text_widget
+                    self.game.board,
+                    SEARCH_DEPTH,
+                    True,
+                    0,
+                    -math.inf,
+                    math.inf,
+                    self.game.PLAYER_1,
+                    text_widget,
                 )
 
             if self.agent2_type == "minimax":
                 text_widget.insert(tk.END, "\n=== Player 2 Minimax Tree ===\n\n")
                 self.game._print_tree_recursive(
-                    self.game.board, SEARCH_DEPTH, True, 0,
-                    -math.inf, math.inf, self.game.PLAYER_2, text_widget
+                    self.game.board,
+                    SEARCH_DEPTH,
+                    True,
+                    0,
+                    -math.inf,
+                    math.inf,
+                    self.game.PLAYER_2,
+                    text_widget,
                 )
 
         # Scrolls straight to the selected player's tree
@@ -345,15 +378,22 @@ class Connect4GUI:
         button_frame = tk.Frame(new_win)
         button_frame.pack(pady=5)
 
-        tk.Button(button_frame, text="Refresh Tree", command=refresh_tree_contents).pack(side=tk.LEFT, padx=5)
-        
+        tk.Button(
+            button_frame, text="Refresh Tree", command=refresh_tree_contents
+        ).pack(side=tk.LEFT, padx=5)
+
         if self.agent1_type == "minimax":
-            tk.Button(button_frame, text="Jump to Player 1", command=lambda: jump_to_player(1)).pack(side=tk.LEFT, padx=5)
+            tk.Button(
+                button_frame, text="Jump to Player 1", command=lambda: jump_to_player(1)
+            ).pack(side=tk.LEFT, padx=5)
         if self.agent2_type == "minimax":
-            tk.Button(button_frame, text="Jump to Player 2", command=lambda: jump_to_player(2)).pack(side=tk.LEFT, padx=5)
+            tk.Button(
+                button_frame, text="Jump to Player 2", command=lambda: jump_to_player(2)
+            ).pack(side=tk.LEFT, padx=5)
 
         # Show tree right away when the window opens
         refresh_tree_contents()
+
 
 AGENT_OPTIONS = [
     "Human",
@@ -361,8 +401,9 @@ AGENT_OPTIONS = [
     "Smart Agent",
     "Minimax Agent",
     "Basic ML Agent",
-    "Minimax-Trained ML Agent"
+    "Minimax-Trained ML Agent",
 ]
+
 
 class StartScreen:
     def __init__(self, root, start_callback):
@@ -379,7 +420,9 @@ class StartScreen:
         self.agent1_var = tk.StringVar(value=AGENT_OPTIONS[0])
         self.agent2_var = tk.StringVar(value=AGENT_OPTIONS[0])
 
-        agent_frame = tk.LabelFrame(self.frame, text="Choose Agents", labelanchor="n", padx=10, pady=10)
+        agent_frame = tk.LabelFrame(
+            self.frame, text="Choose Agents", labelanchor="n", padx=10, pady=10
+        )
         agent_frame.pack(pady=(10, 0))
 
         tk.Label(agent_frame, text="Player 1 Agent:").pack(anchor="w")

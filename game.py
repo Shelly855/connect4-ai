@@ -8,23 +8,30 @@ import math
 import tkinter as tk
 from config import ROW_COUNT, COLUMN_COUNT, SEARCH_DEPTH
 
+
 class Connect4:
     PLAYER_1 = "●"
     PLAYER_2 = "○"
 
     # Create empty 6x7 board
-    def __init__(self, agent1_type="human", agent2_type="ml", agent1_model=None, agent2_model=None):
+    def __init__(
+        self,
+        agent1_type="human",
+        agent2_type="ml",
+        agent1_model=None,
+        agent2_model=None,
+    ):
         self.board = [[" " for _ in range(COLUMN_COUNT)] for _ in range(ROW_COUNT)]
         self.agent1_type = agent1_type
         self.agent2_type = agent2_type
-        self.agent1_model = agent1_model # model for Player 1 (if ML)
-        self.agent2_model = agent2_model # model for Player 2 (if ML)
+        self.agent1_model = agent1_model  # model for Player 1 (if ML)
+        self.agent2_model = agent2_model  # model for Player 2 (if ML)
 
         # Stats for minimax performance
         self.nodes_expanded = 0
         self.search_depth_used = 0
-        self.branching_factors = [] # valid moves per turn
-        self.heuristic_deltas = [] # score changes per move
+        self.branching_factors = []  # valid moves per turn
+        self.heuristic_deltas = []  # score changes per move
 
     def drop_disc(self, column, player_symbol):
         row = self.get_lowest_empty_row(column)
@@ -36,43 +43,45 @@ class Connect4:
     # Check if column is full - returns Boolean
     def is_valid_move(self, column):
         return self.board[0][column] == " "
-    
+
     def check_winner(self, player_symbol):
         # Check horizontal win -
         for row in range(ROW_COUNT):
-            for col in range(COLUMN_COUNT - 3): # avoid out of bounds
+            for col in range(COLUMN_COUNT - 3):  # avoid out of bounds
                 if all(self.board[row][col + i] == player_symbol for i in range(4)):
                     return "horizontal"
-                
+
         # Check vertical win |
         for col in range(COLUMN_COUNT):
-            for row in range(ROW_COUNT - 3): # avoid out of bounds
-                if all (self.board[row + i][col] == player_symbol for i in range(4)):
+            for row in range(ROW_COUNT - 3):  # avoid out of bounds
+                if all(self.board[row + i][col] == player_symbol for i in range(4)):
                     return "vertical"
-                
+
         # Check diagonal win /
-        for row in range(3, ROW_COUNT): # start from row 3 to stay in bounds
+        for row in range(3, ROW_COUNT):  # start from row 3 to stay in bounds
             for col in range(COLUMN_COUNT - 3):
                 # Bottom left -> top right
                 if all(self.board[row - i][col + i] == player_symbol for i in range(4)):
                     return "diagonal"
-                
+
         # Check diagonal win \
         for row in range(3, ROW_COUNT):
             for col in range(3, COLUMN_COUNT):
                 # Bottom-right -> top-left
                 if all(self.board[row - i][col - i] == player_symbol for i in range(4)):
                     return "diagonal"
-        
-        return None # no winner
-    
+
+        return None  # no winner
+
     # Check if draw
     def is_full(self):
         return all(self.board[0][col] != " " for col in range(COLUMN_COUNT))
-    
+
     # Returns score showing how good the position is for the player
     def evaluate_board(self, player_symbol):
-        opponent_symbol = self.PLAYER_1 if player_symbol == self.PLAYER_2 else self.PLAYER_2
+        opponent_symbol = (
+            self.PLAYER_1 if player_symbol == self.PLAYER_2 else self.PLAYER_2
+        )
         score = 0
 
         # Horizontal patterns
@@ -100,7 +109,7 @@ class Connect4:
                 score += self.assess_pattern(player_symbol, opponent_symbol, window)
 
         return score
-    
+
     # A window = sequence of 4 connected cells
     # Returns score showing how favourable the pattern is for the player
     def assess_pattern(self, player_symbol, opponent_symbol, window):
@@ -110,25 +119,25 @@ class Connect4:
         empty_count = window.count(" ")
 
         # Penalise strong opponent patterns
-        if opponent_count == 4: # opponent wins
+        if opponent_count == 4:  # opponent wins
             score -= 100000
-        elif opponent_count == 3 and empty_count == 1: # needs blocking
+        elif opponent_count == 3 and empty_count == 1:  # needs blocking
             score -= 100
         elif opponent_count == 2 and empty_count == 2:
             score -= 10
 
         # Reward strong player patterns
         if player_count == 4:
-            score += 100000 # win
+            score += 100000  # win
         elif player_count == 3 and empty_count == 1:
-            score += 120 # strong setup
+            score += 120  # strong setup
         elif player_count == 2 and empty_count == 2:
             score += 10
 
         # Higher = better for player. Lower = better for opponent
         # Will choose move that maximises this
         return score
-    
+
     # Minimax with alpha-beta pruning
     # True = AI's turn, False = opponent's turn
     # Depth = how many moves ahead to evaluate
@@ -142,16 +151,17 @@ class Connect4:
         self.search_depth_used = max(self.search_depth_used, depth)
         self.nodes_expanded += 1
 
-        valid_moves = [col for col in range(COLUMN_COUNT) if self.is_valid_move(col)] # find all columns where move is possible (not full)
+        # Find all columns where move is possible (not full)
+        valid_moves = [
+            col for col in range(COLUMN_COUNT) if self.is_valid_move(col) 
+        ] 
 
-        opponent_symbol = (
-                self.PLAYER_1 if ai_symbol == self.PLAYER_2 else self.PLAYER_2
-            )
+        opponent_symbol = self.PLAYER_1 if ai_symbol == self.PLAYER_2 else self.PLAYER_2
 
         if self.check_winner(ai_symbol):
-            return None, float('inf')  # player wins
+            return None, float("inf")  # player wins
         elif self.check_winner(opponent_symbol):
-            return None, float('-inf')  # opponent wins
+            return None, float("-inf")  # opponent wins
 
         # Track branching factor
         self.branching_factors.append(len(valid_moves))
@@ -163,15 +173,17 @@ class Connect4:
         # Stop search if depth limit reached or board is full
         if depth == 0 or self.is_full():
             return None, self.evaluate_board(ai_symbol)
-        
+
         if maximising_player:
-            best_score = float('-inf')
+            best_score = float("-inf")
             best_move = None
             for col in valid_moves:
                 row = self.get_lowest_empty_row(col)
                 self.board[row][col] = ai_symbol
-                _, score = self.minimax_agent(alpha, beta, False, depth - 1, ai_symbol) # simulate to see how opponent would respond
-                self.board[row][col] = " " # undo move
+                _, score = self.minimax_agent(
+                    alpha, beta, False, depth - 1, ai_symbol
+                )  # simulate to see how opponent would respond
+                self.board[row][col] = " "  # undo move
 
                 if score > best_score:
                     best_score = score
@@ -184,15 +196,15 @@ class Connect4:
 
             return best_move, best_score
         else:
-            best_score = float('inf') # start high since opponent is minimising
+            best_score = float("inf")  # start high since opponent is minimising
             best_move = None
 
             # Try all valid opponent moves
             for col in valid_moves:
                 row = self.get_lowest_empty_row(col)
-                self.board[row][col] = opponent_symbol # opponent makes move
+                self.board[row][col] = opponent_symbol  # opponent makes move
                 _, score = self.minimax_agent(alpha, beta, True, depth - 1, ai_symbol)
-                self.board[row][col] = " " # undo move
+                self.board[row][col] = " "  # undo move
 
                 # Opponent chooses move that lowest player's score the most
                 if score < best_score:
@@ -204,10 +216,12 @@ class Connect4:
                     break
 
             return best_move, best_score
-        
+
     # AI chooses best move using minimax
     def minimax_agent_move(self, ai_symbol):
-        best_move, _ = self.minimax_agent(-math.inf, math.inf, True, SEARCH_DEPTH, ai_symbol)
+        best_move, _ = self.minimax_agent(
+            -math.inf, math.inf, True, SEARCH_DEPTH, ai_symbol
+        )
 
         if best_move is not None:
             score_before = self.evaluate_board(ai_symbol)
@@ -220,7 +234,7 @@ class Connect4:
             delta = score_after - score_before
             self.heuristic_deltas.append(delta)
 
-            self.board[row][best_move] = " " # undo move after evaluation
+            self.board[row][best_move] = " "  # undo move after evaluation
 
             return best_move
         return self.random_agent()
@@ -233,17 +247,17 @@ class Connect4:
             chosen_move = random.choice(valid_moves)
             return chosen_move
         return None
-    
+
     # Check if player can win this turn
     def find_winning_move(self, player_symbol):
         for col in range(COLUMN_COUNT):
             if self.is_valid_move(col):
                 row = self.get_lowest_empty_row(col)
                 if row is not None:
-                    self.board[row][col] = player_symbol # place disc temporarily
+                    self.board[row][col] = player_symbol  # place disc temporarily
                     if self.check_winner(player_symbol):
-                        self.board[row][col] = " " # undo move
-                        return col # winning column
+                        self.board[row][col] = " "  # undo move
+                        return col  # winning column
                     self.board[row][col] = " "
         return None
 
@@ -254,12 +268,12 @@ class Connect4:
         winning_move = self.find_winning_move(ai_symbol)
         if winning_move is not None:
             return winning_move
-        
+
         # Try to block opponent
         blocking_move = self.find_winning_move(opponent_symbol)
         if blocking_move is not None:
             return blocking_move
-        
+
         # Otherwise, pick random move
         return self.random_agent()
 
@@ -276,7 +290,7 @@ class Connect4:
         if self.is_valid_move(column):
             return column
         else:
-            return self.random_agent() # if column is full
+            return self.random_agent()  # if column is full
 
     def convert_symbol(self, symbol):
         return {self.PLAYER_1: 1, self.PLAYER_2: -1}.get(symbol, 0)
@@ -286,9 +300,19 @@ class Connect4:
         for row in range(ROW_COUNT - 1, -1, -1):
             if self.board[row][column] == " ":
                 return row
-        return None # column is full
+        return None  # column is full
 
-    def _print_tree_recursive(self, board_state, depth, maximising_player, indent, alpha, beta, player_symbol, output_widget):
+    def _print_tree_recursive(
+        self,
+        board_state,
+        depth,
+        maximising_player,
+        indent,
+        alpha,
+        beta,
+        player_symbol,
+        output_widget,
+    ):
         indent_str = "|   " * indent
         valid_moves = [col for col in range(COLUMN_COUNT) if board_state[0][col] == " "]
 
@@ -304,25 +328,41 @@ class Connect4:
 
         for col in valid_moves:
             # Select symbol for current turn
-            current_symbol = player_symbol if maximising_player else (
-            self.PLAYER_1 if player_symbol == self.PLAYER_2 else self.PLAYER_2
+            current_symbol = (
+                player_symbol
+                if maximising_player
+                else (
+                    self.PLAYER_1 if player_symbol == self.PLAYER_2 else self.PLAYER_2
+                )
             )
 
             # Simulate placing a piece in the column
             row = self._simulate_drop(board_state, col, current_symbol)
             if row is None:
-                continue # skip if column is full
+                continue  # skip if column is full
 
             move_label = "Max" if maximising_player else "Min"
-            output_widget.insert(tk.END, f"{indent_str}├── Column {col} ({move_label}, {current_symbol})\n")
+            output_widget.insert(
+                tk.END,
+                f"{indent_str}├── Column {col} ({move_label}, {current_symbol})\n",
+            )
 
             # Switch player for next step
             next_symbol = (
                 self.PLAYER_1 if current_symbol == self.PLAYER_2 else self.PLAYER_2
             )
 
-            _, score = self._print_tree_recursive(board_state, depth - 1, not maximising_player, indent + 1, alpha, beta, next_symbol, output_widget)
-            board_state[row][col] = " " # undo move after simulation
+            _, score = self._print_tree_recursive(
+                board_state,
+                depth - 1,
+                not maximising_player,
+                indent + 1,
+                alpha,
+                beta,
+                next_symbol,
+                output_widget,
+            )
+            board_state[row][col] = " "  # undo move after simulation
 
             # Update best score and pruning values
             if maximising_player:
@@ -343,7 +383,10 @@ class Connect4:
 
         # Only print final decision at root
         if indent == 0:
-            output_widget.insert(tk.END, f"\nBest opening move: Column {best_move} with score {best_score}\n")
+            output_widget.insert(
+                tk.END,
+                f"\nBest opening move: Column {best_move} with score {best_score}\n",
+            )
         return best_move, best_score
 
     def _simulate_drop(self, board, column, symbol):
@@ -352,12 +395,17 @@ class Connect4:
                 board[row][column] = symbol
                 return row
         return None
-    
+
+
 # Start game
 if __name__ == "__main__":
     import joblib
     from connect4_gui import StartScreen, Connect4GUI
-    from config import *
+    from config import (
+        ROW_COUNT,
+        COLUMN_COUNT,
+        SEARCH_DEPTH,
+    )
 
     # Map user-friendly names to internal agent types
     AGENT_MAP = {
@@ -366,12 +414,16 @@ if __name__ == "__main__":
         "Smart Agent": "smart",
         "Minimax Agent": "minimax",
         "Basic ML Agent": "ml",
-        "Minimax-Trained ML Agent": "minimax_ml"
+        "Minimax-Trained ML Agent": "minimax_ml",
     }
 
     # Load pre-trained ML models
-    basic_ml_model = joblib.load("ml_agent.pkl") # trained on UCI Connect-4 dataset: https://archive.ics.uci.edu/dataset/26/connect+4
-    minimax_ml_model = joblib.load("ml_agent_minimax.pkl") # trained on minimax-generated data
+    basic_ml_model = joblib.load(
+        "ml_agent.pkl"  # trained on UCI Connect-4 dataset: https://archive.ics.uci.edu/dataset/26/connect+4
+    )  
+    minimax_ml_model = joblib.load(
+        "ml_agent_minimax.pkl"  # trained on minimax-generated data
+    ) 
 
     def start_game(agent1_name, agent2_name, root):
         # Get agent types from UI selection
@@ -380,14 +432,14 @@ if __name__ == "__main__":
 
         # Select models if needed
         agent1_model = (
-            basic_ml_model if agent1_type == "ml"
-            else minimax_ml_model if agent1_type == "minimax_ml"
-            else None
+            basic_ml_model
+            if agent1_type == "ml"
+            else minimax_ml_model if agent1_type == "minimax_ml" else None
         )
         agent2_model = (
-            basic_ml_model if agent2_type == "ml"
-            else minimax_ml_model if agent2_type == "minimax_ml"
-            else None
+            basic_ml_model
+            if agent2_type == "ml"
+            else minimax_ml_model if agent2_type == "minimax_ml" else None
         )
 
         # Launch game GUI
@@ -398,12 +450,3 @@ if __name__ == "__main__":
     root.title("Connect 4 Setup")
     StartScreen(root, lambda a1, a2: start_game(a1, a2, root))
     root.mainloop()
-
-
-# TO DO:
-# Consistent comment capitals
-# More comments
-# Add citations used
-# Vid presentation
-# Make repositories public
-# Check if AI still assumed as player 2 somewhere

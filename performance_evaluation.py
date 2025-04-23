@@ -2,15 +2,17 @@ from game import Connect4
 import joblib
 import csv
 import time
-import psutil # for evaluating memory usage
+import psutil  # for evaluating memory usage
 
-# How to Run: python performance_evaluation.py
 
 # Load ML models
 basic_ml_model = joblib.load("ml_agent.pkl")
 minimax_ml_model = joblib.load("ml_agent_minimax.pkl")
 
-def simulate_match(agent1_type, agent2_type, agent1_model=None, agent2_model=None, games=500):
+
+def simulate_match(
+    agent1_type, agent2_type, agent1_model=None, agent2_model=None, games=500
+):
     all_game_data = []
 
     # Simulate multiple games between the two agents
@@ -57,7 +59,7 @@ def simulate_match(agent1_type, agent2_type, agent1_model=None, agent2_model=Non
                 move = game.ml_agent_predict(model)
             else:
                 raise ValueError("Agent type must be AI.")
-            
+
             end_time = time.perf_counter()
             move_duration = end_time - start_time
 
@@ -82,44 +84,71 @@ def simulate_match(agent1_type, agent2_type, agent1_model=None, agent2_model=Non
                 winner = "draw"
                 break
 
-            current_symbol = game.PLAYER_2 if current_symbol == game.PLAYER_1 else game.PLAYER_1
+            current_symbol = (
+                game.PLAYER_2 if current_symbol == game.PLAYER_1 else game.PLAYER_1
+            )
 
         # Post-game metrics
         # After game ends - calculate metrics
-        avg_time_agent1 = total_time_agent1 / move_count_agent1 if move_count_agent1 > 0 else 0
-        avg_time_agent2 = total_time_agent2 / move_count_agent2 if move_count_agent2 > 0 else 0
+        avg_time_agent1 = (
+            total_time_agent1 / move_count_agent1 if move_count_agent1 > 0 else 0
+        )
+        avg_time_agent2 = (
+            total_time_agent2 / move_count_agent2 if move_count_agent2 > 0 else 0
+        )
 
         # Track memory usage
         process = psutil.Process()
-        memory_usage_mb = process.memory_info().rss / 1024**2  # convert to mb
+        memory_usage_mb = process.memory_info().rss / 1024**2  # convert to MB
 
         # Calculate average branching factor
         avg_branching = (
             sum(game.branching_factors) / len(game.branching_factors)
-            if game.branching_factors else 0
+            if game.branching_factors
+            else 0
         )
 
         avg_heuristic_delta = (
             sum(game.heuristic_deltas) / len(game.heuristic_deltas)
-            if game.heuristic_deltas else 0
+            if game.heuristic_deltas
+            else 0
         )
 
         # Save game data
-        all_game_data.append({
-            "matchup": f"{agent1_type}_vs_{agent2_type}",
-            "winner": winner,
-            "moves": turns,
-            "minimax_nodes": game.nodes_expanded if "minimax" in [agent1_type, agent2_type] else "",
-            "minimax_depth": game.search_depth_used if "minimax" in [agent1_type, agent2_type] else "",
-            "avg_time_agent1": round(avg_time_agent1, 5),
-            "avg_time_agent2": round(avg_time_agent2, 5),
-            "win_type": win_type if winner != "draw" else "draw",
-            "memory_mb": round(memory_usage_mb, 2),
-            "avg_branching_factor": round(avg_branching, 2) if "minimax" in [agent1_type, agent2_type] else "",
-            "avg_heuristic_delta": round(avg_heuristic_delta, 2) if "minimax" in [agent1_type, agent2_type] else ""
-        })
+        all_game_data.append(
+            {
+                "matchup": f"{agent1_type}_vs_{agent2_type}",
+                "winner": winner,
+                "moves": turns,
+                "minimax_nodes": (
+                    game.nodes_expanded
+                    if "minimax" in [agent1_type, agent2_type]
+                    else ""
+                ),
+                "minimax_depth": (
+                    game.search_depth_used
+                    if "minimax" in [agent1_type, agent2_type]
+                    else ""
+                ),
+                "avg_time_agent1": round(avg_time_agent1, 5),
+                "avg_time_agent2": round(avg_time_agent2, 5),
+                "win_type": win_type if winner != "draw" else "draw",
+                "memory_mb": round(memory_usage_mb, 2),
+                "avg_branching_factor": (
+                    round(avg_branching, 2)
+                    if "minimax" in [agent1_type, agent2_type]
+                    else ""
+                ),
+                "avg_heuristic_delta": (
+                    round(avg_heuristic_delta, 2)
+                    if "minimax" in [agent1_type, agent2_type]
+                    else ""
+                ),
+            }
+        )
 
     return all_game_data
+
 
 # Run matchups
 results = []
