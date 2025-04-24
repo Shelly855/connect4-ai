@@ -2,6 +2,21 @@
 
 This is the **final GUI version** of the Connect 4 game, with a visual interface built with `tkinter`.
 
+---
+
+## Table of Contents
+
+- [Connect 4](#connect-4)
+- [Supported Modes](#supported-modes)
+- [Requirements](#requirements)
+- [How to Run](#how-to-run)
+- [Files](#files)
+- [Notes](#notes)
+- [References](#references)
+- [GitHub Version (Optional)](#github-version-optional)
+
+---
+
 ### Supported Modes
 
 - Human vs Human
@@ -70,4 +85,4 @@ This is the **final GUI version** of the Connect 4 game, with a visual interface
 ## GitHub Version (Optional)
 
 [View this folder on GitHub](https://github.com/Shelly855/connect-4-ai)
-> **Note:** This link is optional and not required for marking. The GitHub version may be updated after submission.
+> **Note:** This GitHub link is optional and not required for marking. The repository may be updated after submission.
