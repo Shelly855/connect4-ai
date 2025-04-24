@@ -1,3 +1,17 @@
+"""
+connect4_gui.py - Graphical interface for Connect 4 with agent integration.
+
+This module provides the full Tkinter-based GUI for the Connect 4 game. It supports:
+- Human vs Human, Human vs AI, and AI vs AI matches
+- AI agent types: Random, Smart (1-ply), Minimax, Basic ML, and Minimax-Trained ML
+- Visual representation of the board and moves
+- Real-time game tree visualisation for Minimax agents
+- Adjustable AI move speed via a slider
+- Sidebar for status messages, reset options, and new game setup
+
+Also includes the initial start screen UI for selecting agents and launching games.
+"""
+
 import tkinter as tk
 from config import (
     ROW_COUNT,

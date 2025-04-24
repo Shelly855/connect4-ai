@@ -1,7 +1,23 @@
-# === General References ===
-# - Keith Galli’s Connect 4 AI (GitHub):
-#   https://github.com/KeithGalli/Connect4-Python/blob/master/connect4_with_ai.py
-#   Used as a reference for structuring minimax, alpha-beta pruning, and evaluation heuristics.
+# General Reference:
+# Keith Galli – Connect 4 AI (GitHub)
+# https://github.com/KeithGalli/Connect4-Python/blob/master/connect4_with_ai.py
+# Used as a reference for structuring minimax, alpha-beta pruning, and evaluation heuristics.
+
+"""
+game.py - Core Connect 4 logic, agents, and gameplay mechanics.
+
+This module implements the Connect4 class, which handles board setup, move logic, 
+win/draw checking, and AI agent behaviour. It supports multiple agent types:
+- Random
+- Smart (1-ply rule-based)
+- Minimax with alpha-beta pruning
+- ML-based agents (trained on UCI data or minimax-generated decisions)
+
+It also includes board evaluation functions and a minimax tree visualiser. 
+This logic is reused in both the GUI and performance evaluation scripts.
+Running this file directly will launch the full graphical interface.
+Run this script with `python game.py` to start the game.
+"""
 
 import random
 import math

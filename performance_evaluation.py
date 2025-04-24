@@ -1,3 +1,18 @@
+"""
+performance_evaluation.py - Simulates AI matchups and collects performance metrics for Connect 4 agents.
+
+This script runs automated matchups between different AI agent types (Random, Smart, Minimax, Basic ML,
+and Minimax-Trained ML) using the Connect4 class. It records key performance metrics across multiple games, including:
+- Win/loss/draw outcomes
+- Average move time per agent
+- Memory usage
+- Minimax-specific stats (nodes expanded, depth reached, heuristic delta, branching factor)
+
+The results from each matchup are saved to `game_results.csv`, which was used for visualisation in Jupyter Notebook.
+
+Run this script with `python performance_evaluation.py` to regenerate 'game_results.csv'.
+"""
+
 from game import Connect4
 import joblib
 import csv
