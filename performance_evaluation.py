@@ -28,6 +28,7 @@ minimax_ml_model = joblib.load("ml_agent_minimax.pkl")
 def simulate_match(
     agent1_type, agent2_type, agent1_model=None, agent2_model=None, games=500
 ):
+    """Runs multiple games between two AI agents and logs performance metrics like win rate, move speed, and memory usage."""
     all_game_data = []
 
     # Simulate multiple games between the two agents

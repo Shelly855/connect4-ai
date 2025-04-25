@@ -1,14 +1,14 @@
 """
 game.py - Core Connect 4 logic, agents, and gameplay mechanics.
 
-This module implements the Connect4 class, which handles board setup, move logic, 
+This module implements the Connect4 class, which handles board setup, move logic,
 win/draw checking, and AI agent behaviour. It supports multiple agent types:
 - Random
 - Smart (1-ply rule-based)
 - Minimax with alpha-beta pruning
 - ML-based agents (trained on UCI data or minimax-generated decisions)
 
-It also includes board evaluation functions and a minimax tree visualiser. 
+It also includes board evaluation functions and a minimax tree visualiser.
 This logic is reused in both the GUI and performance evaluation scripts.
 Running this file directly will launch the full graphical interface.
 Run this script with `python game.py` to start the game.
@@ -50,17 +50,19 @@ class Connect4:
         self.heuristic_deltas = []  # score changes per move
 
     def drop_disc(self, column, player_symbol):
+        """Places the player's disc in the chosen column if possible. Returns True if successful."""
         row = self.get_lowest_empty_row(column)
         if row is not None:
             self.board[row][column] = player_symbol
             return True
         return False
 
-    # Check if column is full - returns Boolean
     def is_valid_move(self, column):
+        """Returns True if the selected column has at least one empty slot."""
         return self.board[0][column] == " "
 
     def check_winner(self, player_symbol):
+        """Checks the board for a winning condition (horizontal, vertical, or diagonal) for the given player."""
         # Check horizontal win -
         for row in range(ROW_COUNT):
             for col in range(COLUMN_COUNT - 3):  # avoid out of bounds
@@ -89,12 +91,12 @@ class Connect4:
 
         return None  # no winner
 
-    # Check if draw
     def is_full(self):
+        """Returns True if the board has no empty slots left (i.e., a draw)."""
         return all(self.board[0][col] != " " for col in range(COLUMN_COUNT))
 
-    # Returns score showing how good the position is for the player
     def evaluate_board(self, player_symbol):
+        """Scores the board from the given player's perspective using heuristics. Higher is better for the player."""
         opponent_symbol = (
             self.PLAYER_1 if player_symbol == self.PLAYER_2 else self.PLAYER_2
         )
@@ -127,8 +129,8 @@ class Connect4:
         return score
 
     # A window = sequence of 4 connected cells
-    # Returns score showing how favourable the pattern is for the player
     def assess_pattern(self, player_symbol, opponent_symbol, window):
+        """Evaluates a group of four cells and assigns a score based on potential threats or advantages."""
         score = 0
         opponent_count = window.count(opponent_symbol)
         player_count = window.count(player_symbol)
@@ -163,14 +165,13 @@ class Connect4:
     # Reference: Science Buddies - Minimax with Alpha-Beta Pruning
     # https://www.youtube.com/watch?v=rbmk1qtVEmg
     def minimax_agent(self, alpha, beta, maximising_player, depth, ai_symbol):
+        """Recursive minimax algorithm with alpha-beta pruning to choose the best move for the AI."""
         # Track search stats
         self.search_depth_used = max(self.search_depth_used, depth)
         self.nodes_expanded += 1
 
         # Find all columns where move is possible (not full)
-        valid_moves = [
-            col for col in range(COLUMN_COUNT) if self.is_valid_move(col) 
-        ] 
+        valid_moves = [col for col in range(COLUMN_COUNT) if self.is_valid_move(col)]
 
         opponent_symbol = self.PLAYER_1 if ai_symbol == self.PLAYER_2 else self.PLAYER_2
 
@@ -233,8 +234,8 @@ class Connect4:
 
             return best_move, best_score
 
-    # AI chooses best move using minimax
     def minimax_agent_move(self, ai_symbol):
+        """Returns the best move for the AI using minimax, while logging heuristic delta for analysis."""
         best_move, _ = self.minimax_agent(
             -math.inf, math.inf, True, SEARCH_DEPTH, ai_symbol
         )
@@ -255,8 +256,8 @@ class Connect4:
             return best_move
         return self.random_agent()
 
-    # AI chooses a random valid move
     def random_agent(self):
+        """Returns a random valid column for the next move."""
         valid_moves = [col for col in range(COLUMN_COUNT) if self.is_valid_move(col)]
 
         if valid_moves:
@@ -278,6 +279,7 @@ class Connect4:
         return None
 
     def smart_agent(self, ai_symbol):
+        """Tries to win in one move or block the opponent if they can win next turn. Falls back to random otherwise."""
         opponent_symbol = self.PLAYER_1 if ai_symbol == self.PLAYER_2 else self.PLAYER_2
 
         # Try to win
@@ -294,6 +296,7 @@ class Connect4:
         return self.random_agent()
 
     def ml_agent_predict(self, model):
+        """Uses a trained ML model to predict the best move. Defaults to a random move if the prediction is invalid."""
         flat_board = [self.convert_symbol(cell) for row in self.board for cell in row]
 
         # Predict best column using a trained ML model
@@ -309,14 +312,16 @@ class Connect4:
             return self.random_agent()  # if column is full
 
     def convert_symbol(self, symbol):
+        """Converts board symbols to numerical values used by ML models."""
         return {self.PLAYER_1: 1, self.PLAYER_2: -1}.get(symbol, 0)
 
     def get_lowest_empty_row(self, column):
+        """Finds the lowest available row in a column. Returns None if the column is full."""
         # Start from bottom row and move upward
         for row in range(ROW_COUNT - 1, -1, -1):
             if self.board[row][column] == " ":
                 return row
-        return None  # column is full
+        return None
 
     def _print_tree_recursive(
         self,
@@ -329,6 +334,7 @@ class Connect4:
         player_symbol,
         output_widget,
     ):
+        """Recursively builds and displays the minimax decision tree in the given output widget."""
         indent_str = "|   " * indent
         valid_moves = [col for col in range(COLUMN_COUNT) if board_state[0][col] == " "]
 
@@ -406,6 +412,7 @@ class Connect4:
         return best_move, best_score
 
     def _simulate_drop(self, board, column, symbol):
+        """Simulates a disc drop without altering the actual game state. Returns the row if successful."""
         for row in range(ROW_COUNT - 1, -1, -1):
             if board[row][column] == " ":
                 board[row][column] = symbol
@@ -436,10 +443,10 @@ if __name__ == "__main__":
     # Load pre-trained ML models
     basic_ml_model = joblib.load(
         "ml_agent.pkl"  # trained on UCI Connect-4 dataset: https://archive.ics.uci.edu/dataset/26/connect+4
-    )  
+    )
     minimax_ml_model = joblib.load(
         "ml_agent_minimax.pkl"  # trained on minimax-generated data
-    ) 
+    )
 
     def start_game(agent1_name, agent2_name, root):
         # Get agent types from UI selection

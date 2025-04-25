@@ -45,6 +45,7 @@ class Connect4GUI:
     def __init__(
         self, agent1_type, agent2_type, agent1_model=None, agent2_model=None, root=None
     ):
+        """Initialises the game window, sets up the board, sidebar, and event handlers."""
         self.turn = 0
 
         self.agent1_type = agent1_type
@@ -146,6 +147,7 @@ class Connect4GUI:
             self.root.after(delay, self.play_turn)
 
     def draw_board(self):
+        """Draws the Connect 4 board grid and empty disc slots on the canvas."""
         for row in range(ROW_COUNT):
             for col in range(COLUMN_COUNT):
                 # Top left corner of cell
@@ -169,16 +171,18 @@ class Connect4GUI:
                     tags=f"cell_{row}_{col}",  # so can update later
                 )
 
-    # Change colour at (row, col) to match player's move
     def update_disc(self, row, col, symbol):
+        """Fills the disc slot at (row, col) with the correct colour based on the player's symbol."""
         colour = PLAYER_1_COLOUR if symbol == self.game.PLAYER_1 else PLAYER_2_COLOUR
         self.canvas.itemconfig(f"cell_{row}_{col}", fill=colour)
 
     def click_handler(self, event):
+        """Called when a human clicks the board. Passes the selected column to play_turn()."""
         col = event.x // 100
         self.play_turn(col)
 
     def play_turn(self, col=None):
+        """Handles a single turn: gets move, updates the board, and checks for win/draw."""
         current_player = (
             self.game.PLAYER_1 if self.turn % 2 == 0 else self.game.PLAYER_2
         )
@@ -245,6 +249,7 @@ class Connect4GUI:
             self.root.after(delay, self.play_turn)
 
     def update_turn_label(self):
+        """Updates the sidebar label to show whose turn it is."""
         if self.turn % 2 == 0:
             current_player = "Player 1"
             agent_type = self.game.agent1_type
@@ -262,6 +267,7 @@ class Connect4GUI:
         )
 
     def reset_board(self):
+        """Resets the game board and turn counter, keeping the same agents."""
         self.turn = 0
         self.game = Connect4(
             agent1_type=self.agent1_type,
@@ -292,17 +298,19 @@ class Connect4GUI:
             delay = self.speed_slider.get() if hasattr(self, "speed_slider") else 1000
             self.root.after(delay, self.play_turn)
 
-    # Show agent options again
     def return_to_start(self):
+        """Closes the game window and returns to the agent selection screen."""
         self.root.destroy()
         self.parent_root.deiconify()
 
     def exit_game(self):
+        """Closes both the game window and the initial setup window."""
         self.root.destroy()
         if self.parent_root:
             self.parent_root.destroy()
 
     def refresh_minimax_tree(self):
+        """Refreshes the minimax tree display (if applicable) based on the current board state."""
         if hasattr(self, "tree_output"):
             self.tree_output.delete("1.0", tk.END)
 
@@ -334,6 +342,7 @@ class Connect4GUI:
                 )
 
     def open_tree_in_new_window(self):
+        """Opens a new window to display the full minimax decision tree for one or both players."""
         new_win = tk.Toplevel(self.root)
         new_win.title("Full Minimax Tree")
 
@@ -426,6 +435,7 @@ AGENT_OPTIONS = [
 
 class StartScreen:
     def __init__(self, root, start_callback):
+        """Sets up the initial agent selection screen and game launch button."""
         self.root = root
         self.root.minsize(width=300, height=300)
         self.start_callback = start_callback
@@ -458,6 +468,7 @@ class StartScreen:
         tk.Button(self.frame, text="Start Game", command=self.start_game).pack(pady=20)
 
     def start_game(self):
+        """Reads the selected agent types and launches the game GUI."""
         agent1 = self.agent1_var.get()
         agent2 = self.agent2_var.get()
         self.root.withdraw()
