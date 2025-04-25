@@ -10,6 +10,11 @@ This module provides the full Tkinter-based GUI for the Connect 4 game. It suppo
 - Sidebar for status messages, reset options, and new game setup
 
 Also includes the initial start screen UI for selecting agents and launching games.
+
+Reference:
+- Real Python - Python GUI Programming With Tkinter
+    https://realpython.com/python-gui-tkinter/
+    Used as a reference for building the GUI layout and event handling with Tkinter.
 """
 
 import tkinter as tk

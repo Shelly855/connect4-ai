@@ -1,8 +1,3 @@
-# General Reference:
-# Keith Galli – Connect 4 AI (GitHub)
-# https://github.com/KeithGalli/Connect4-Python/blob/master/connect4_with_ai.py
-# Used as a reference for structuring minimax, alpha-beta pruning, and evaluation heuristics.
-
 """
 game.py - Core Connect 4 logic, agents, and gameplay mechanics.
 
@@ -17,6 +12,11 @@ It also includes board evaluation functions and a minimax tree visualiser.
 This logic is reused in both the GUI and performance evaluation scripts.
 Running this file directly will launch the full graphical interface.
 Run this script with `python game.py` to start the game.
+
+General Reference:
+- Keith Galli - Connect 4 AI (GitHub)
+    https://github.com/KeithGalli/Connect4-Python/blob/master/connect4_with_ai.py
+    Used as a reference for structuring minimax, alpha-beta pruning, and evaluation heuristics.
 """
 
 import random
