@@ -79,6 +79,10 @@ This is the **final GUI version** of the Connect 4 game, with a visual interface
 - Connect 4 dataset from UCI Machine Learning Repository
   - https://archive.ics.uci.edu/dataset/26/connect+4
   - Used to train the basic ML agent
+- Real Python – Python GUI Programming With Tkinter
+  - https://realpython.com/python-gui-tkinter/
+  - Used as a reference for building the GUI layout and event handling in Tkinter
+  
  
 ---
 
