@@ -18,6 +18,7 @@ Reference:
 """
 
 import tkinter as tk
+from tkinter import PhotoImage
 from config import (
     ROW_COUNT,
     COLUMN_COUNT,
@@ -85,6 +86,12 @@ class Connect4GUI:
         self.sidebar.pack(side=tk.RIGHT, padx=20, fill=tk.Y)
         self.sidebar.pack_propagate(False)  # stop window resizing
 
+        # Load button icons
+        self.reset_icon = PhotoImage(file="icons/reset.png")
+        self.new_game_icon = PhotoImage(file="icons/new_game.png")
+        self.exit_icon = PhotoImage(file="icons/exit.png")
+        self.tree_icon = PhotoImage(file="icons/tree.png")
+
         # Shows final outcome
         self.status_label = tk.Label(self.sidebar, text="", font=("Helvetica", 14))
         self.status_label.pack(pady=10)
@@ -119,31 +126,56 @@ class Connect4GUI:
 
         # Clear board but agents stay the same
         self.reset_button = tk.Button(
-            button_frame, text="Reset Game", width=20, command=self.reset_board
+            button_frame,
+            text="Reset Game",
+            image=self.reset_icon,
+            compound="left",
+            padx=10,
+            pady=5,
+            command=self.reset_board,
         )
         self.reset_button.pack(pady=5)
+        self.reset_button.image = self.reset_icon
 
         # Return to agent options
         self.new_game_button = tk.Button(
-            button_frame, text="New Game", width=20, command=self.return_to_start
+            button_frame,
+            text="New Game",
+            image=self.new_game_icon,
+            compound="left",
+            padx=10,
+            pady=5,
+            command=self.return_to_start,
         )
         self.new_game_button.pack(pady=5)
+        self.new_game_button.image = self.new_game_icon
 
         self.exit_button = tk.Button(
-            button_frame, text="Exit Game", width=20, command=self.exit_game
+            button_frame,
+            text="Exit Game",
+            image=self.exit_icon,
+            compound="left",
+            padx=10,
+            pady=5,
+            command=self.exit_game,
         )
         self.exit_button.pack(pady=5)
+        self.exit_button.image = self.exit_icon
 
         if agent1_type == "minimax" or agent2_type == "minimax":
             self.expand_button = tk.Button(
                 button_frame,
                 text="View Minimax Tree",
-                width=20,
+                image=self.tree_icon,
+                compound="left",
+                padx=10,
+                pady=5,
                 bg="lightblue",
                 font=("Helvetica", 10, "bold"),
                 command=self.open_tree_in_new_window,
             )
             self.expand_button.pack(pady=(10, 0))
+            self.expand_button.image = self.tree_icon
 
         # If Player 1 is AI, autostart after main game screen appears
         first_agent = agent1_type
@@ -188,12 +220,18 @@ class Connect4GUI:
         )
         if agent_type != "human":
             return
-    
+
         col = event.x // 100
         self.play_turn(col)
 
     def show_game_over_message(self, text, colour):
-        self.game_over_label = tk.Label(self.canvas, text=text, font=("Helvetica", 32, "bold"), fg=colour, bg="white")
+        self.game_over_label = tk.Label(
+            self.canvas,
+            text=text,
+            font=("Helvetica", 32, "bold"),
+            fg=colour,
+            bg="white",
+        )
         self.game_over_label.place(relx=0.5, rely=0.5, anchor="center")
 
     def play_turn(self, col=None):
@@ -241,7 +279,7 @@ class Connect4GUI:
 
             self.status_label.config(
                 text=f"Player {player_number}\n({agent_display}) wins!", fg=colour
-            ) 
+            )
             self.turn_label.config(text="")  # clear turn label
             self.show_game_over_message(f"Player {player_number} Wins!", colour)
             self.root.after(300, self.show_game_stats)
@@ -453,14 +491,20 @@ class Connect4GUI:
 
         if self.agent1_type == "minimax" or self.agent2_type == "minimax":
             stats_lines.append(f"Total nodes expanded: {self.game.nodes_expanded}")
-            stats_lines.append(f"Maximum search depth reached: {self.game.search_depth_used}")
+            stats_lines.append(
+                f"Maximum search depth reached: {self.game.search_depth_used}"
+            )
 
             if self.game.branching_factors:
-                avg_branching = sum(self.game.branching_factors) / len(self.game.branching_factors)
+                avg_branching = sum(self.game.branching_factors) / len(
+                    self.game.branching_factors
+                )
                 stats_lines.append(f"Average branching factor: {avg_branching:.2f}")
 
             if self.game.heuristic_deltas:
-                avg_heuristic = sum(self.game.heuristic_deltas) / len(self.game.heuristic_deltas)
+                avg_heuristic = sum(self.game.heuristic_deltas) / len(
+                    self.game.heuristic_deltas
+                )
                 stats_lines.append(f"Average heuristic delta: {avg_heuristic:.2f}")
 
         stats_window = tk.Toplevel(self.root)
@@ -468,17 +512,30 @@ class Connect4GUI:
         stats_window.geometry("320x300")
         stats_window.resizable(False, False)
 
-        title_label = tk.Label(stats_window, text="Game Statistics", font=("Helvetica", 16, "bold"), fg="darkblue")
+        title_label = tk.Label(
+            stats_window,
+            text="Game Statistics",
+            font=("Helvetica", 16, "bold"),
+            fg="darkblue",
+        )
         title_label.pack(pady=(15, 10))
 
         stats_frame = tk.Frame(stats_window)
         stats_frame.pack(padx=20, pady=10)
 
         for line in stats_lines:
-            stat_label = tk.Label(stats_frame, text=line, font=("Helvetica", 12), anchor="w", justify="left")
+            stat_label = tk.Label(
+                stats_frame,
+                text=line,
+                font=("Helvetica", 12),
+                anchor="w",
+                justify="left",
+            )
             stat_label.pack(anchor="w")
 
-        close_button = tk.Button(stats_window, text="Close", command=stats_window.destroy)
+        close_button = tk.Button(
+            stats_window, text="Close", command=stats_window.destroy
+        )
         close_button.pack(pady=15)
 
 
