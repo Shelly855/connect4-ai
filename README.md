@@ -52,6 +52,7 @@ This is the **final GUI version** of the Connect 4 game, with a visual interface
 
 - `game.py` – Core game and AI logic (also launches GUI)
 - `connect4_gui.py` - Handles the GUI and game interactions
+- `icons/` — Contains button icons used by the GUI
 - `config.py` - Board dimensions, colours, and player tokens
 - `ml_agent.pkl` – ML model trained using real game data (UCI dataset)
 - `ml_agent_minimax.pkl` – ML model trained using data generated from the minimax algorithm
