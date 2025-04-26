@@ -189,6 +189,10 @@ class Connect4GUI:
         col = event.x // 100
         self.play_turn(col)
 
+    def show_game_over_message(self, text, colour):
+        self.game_over_label = tk.Label(self.canvas, text=text, font=("Helvetica", 32, "bold"), fg=colour, bg="white")
+        self.game_over_label.place(relx=0.5, rely=0.5, anchor="center")
+
     def play_turn(self, col=None):
         """Handles a single turn: gets move, updates the board, and checks for win/draw."""
         current_player = (
@@ -234,14 +238,16 @@ class Connect4GUI:
 
             self.status_label.config(
                 text=f"Player {player_number}\n({agent_display}) wins!", fg=colour
-            )
+            ) 
             self.turn_label.config(text="")  # clear turn label
+            self.show_game_over_message(f"Player {player_number} Wins!", colour)
             return
 
         # Check for draw
         if self.game.is_full():
             self.status_label.config(text="It's a draw!", fg=DRAW_COLOUR)
             self.turn_label.config(text="")
+            self.show_game_over_message("It's a Draw!", DRAW_COLOUR)
             return
 
         # Next player's turn
@@ -283,6 +289,10 @@ class Connect4GUI:
             agent1_model=self.agent1_model,
             agent2_model=self.agent2_model,
         )
+
+        if hasattr(self, "game_over_label"):
+            self.game_over_label.destroy()
+            del self.game_over_label
 
         # Clear outcome and turn messages
         self.status_label.config(text="")
