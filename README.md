@@ -89,5 +89,5 @@ This is the **final GUI version** of the Connect 4 game, with a visual interface
 
 ## GitHub Version (Optional)
 
-[View this folder on GitHub](https://github.com/Shelly855/connect-4-ai)
+[View this folder on GitHub](https://github.com/Shelly855/connect4-ai)
 > **Note:** This GitHub link is optional and not required for marking. The repository may be updated after submission.
