@@ -81,7 +81,7 @@ class Connect4GUI:
         self.draw_board()
 
         # Right side: Sidebar for status labels, turn label, minimax tree
-        self.sidebar = tk.Frame(self.main_frame, width=300)
+        self.sidebar = tk.Frame(self.main_frame, width=320)
         self.sidebar.pack(side=tk.RIGHT, padx=20, fill=tk.Y)
         self.sidebar.pack_propagate(False)  # stop window resizing
 
