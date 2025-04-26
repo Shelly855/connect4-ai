@@ -57,6 +57,7 @@ class Connect4GUI:
         self.root = tk.Toplevel(root)
         self.root.title("Connect 4")
         self.parent_root = root
+        self.root.minsize(1000, 700)
 
         # Exit cleanly when users close window using x button
         self.root.protocol("WM_DELETE_WINDOW", self.exit_game)
@@ -93,15 +94,16 @@ class Connect4GUI:
         self.turn_label.pack(pady=5)
         self.update_turn_label()
 
-        # Speed slider
-        speed_frame = tk.LabelFrame(self.sidebar, text="AI Speed (ms):")
-        speed_frame.pack(pady=10, fill=tk.X, padx=10)
+        # Only show AI speed slider if any agent is not human
+        if self.agent1_type != "human" or self.agent2_type != "human":
+            speed_frame = tk.LabelFrame(self.sidebar, text="AI Speed (ms):")
+            speed_frame.pack(pady=10, fill=tk.X, padx=10)
 
-        self.speed_slider = tk.Scale(
-            speed_frame, from_=100, to=2000, resolution=100, orient=tk.HORIZONTAL
-        )
-        self.speed_slider.set(1000)  # default
-        self.speed_slider.pack(padx=10)
+            self.speed_slider = tk.Scale(
+                speed_frame, from_=100, to=2000, resolution=100, orient=tk.HORIZONTAL
+            )
+            self.speed_slider.set(1000)  # default
+            self.speed_slider.pack(padx=10)
 
         # Instructions for human player (only shows if one player is a human)
         if agent1_type == "human" or agent2_type == "human":
@@ -427,7 +429,6 @@ class Connect4GUI:
 
         # Show tree right away when the window opens
         refresh_tree_contents()
-
 
 AGENT_OPTIONS = [
     "Human",
