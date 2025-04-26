@@ -178,6 +178,12 @@ class Connect4GUI:
 
     def click_handler(self, event):
         """Called when a human clicks the board. Passes the selected column to play_turn()."""
+        agent_type = (
+            self.game.agent1_type if self.turn % 2 == 0 else self.game.agent2_type
+        )
+        if agent_type != "human":
+            return
+    
         col = event.x // 100
         self.play_turn(col)
 
