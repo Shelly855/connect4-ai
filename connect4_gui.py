@@ -241,6 +241,7 @@ class Connect4GUI:
             ) 
             self.turn_label.config(text="")  # clear turn label
             self.show_game_over_message(f"Player {player_number} Wins!", colour)
+            self.root.after(300, self.show_game_stats)
             return
 
         # Check for draw
@@ -248,6 +249,7 @@ class Connect4GUI:
             self.status_label.config(text="It's a draw!", fg=DRAW_COLOUR)
             self.turn_label.config(text="")
             self.show_game_over_message("It's a Draw!", DRAW_COLOUR)
+            self.root.after(300, self.show_game_stats)
             return
 
         # Next player's turn
@@ -439,6 +441,43 @@ class Connect4GUI:
 
         # Show tree right away when the window opens
         refresh_tree_contents()
+
+    def show_game_stats(self):
+        """Displays game statistics in a popup window after match ends."""
+        moves_played = self.turn + 1
+
+        stats_lines = [f"Moves played: {moves_played}"]
+
+        if self.agent1_type == "minimax" or self.agent2_type == "minimax":
+            stats_lines.append(f"Total nodes expanded: {self.game.nodes_expanded}")
+            stats_lines.append(f"Maximum search depth reached: {self.game.search_depth_used}")
+
+            if self.game.branching_factors:
+                avg_branching = sum(self.game.branching_factors) / len(self.game.branching_factors)
+                stats_lines.append(f"Average branching factor: {avg_branching:.2f}")
+
+            if self.game.heuristic_deltas:
+                avg_heuristic = sum(self.game.heuristic_deltas) / len(self.game.heuristic_deltas)
+                stats_lines.append(f"Average heuristic delta: {avg_heuristic:.2f}")
+
+        stats_window = tk.Toplevel(self.root)
+        stats_window.title("Game Stats")
+        stats_window.geometry("320x300")
+        stats_window.resizable(False, False)
+
+        title_label = tk.Label(stats_window, text="Game Statistics", font=("Helvetica", 16, "bold"), fg="darkblue")
+        title_label.pack(pady=(15, 10))
+
+        stats_frame = tk.Frame(stats_window)
+        stats_frame.pack(padx=20, pady=10)
+
+        for line in stats_lines:
+            stat_label = tk.Label(stats_frame, text=line, font=("Helvetica", 12), anchor="w", justify="left")
+            stat_label.pack(anchor="w")
+
+        close_button = tk.Button(stats_window, text="Close", command=stats_window.destroy)
+        close_button.pack(pady=15)
+
 
 AGENT_OPTIONS = [
     "Human",
