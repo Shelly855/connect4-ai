@@ -282,7 +282,7 @@ class Connect4GUI:
 
         if hasattr(self, "instructions_label"):
             self.instructions_label.config(
-                text="If you're a human player, click any column to drop your disc."
+                text="If you're a human player, click\n any column to drop your disc."
             )
             self.instructions_label.pack()
 
