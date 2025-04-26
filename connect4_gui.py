@@ -119,25 +119,28 @@ class Connect4GUI:
 
         # Clear board but agents stay the same
         self.reset_button = tk.Button(
-            button_frame, text="Reset Game", command=self.reset_board
+            button_frame, text="Reset Game", width=20, command=self.reset_board
         )
         self.reset_button.pack(pady=5)
 
         # Return to agent options
         self.new_game_button = tk.Button(
-            button_frame, text="New Game", command=self.return_to_start
+            button_frame, text="New Game", width=20, command=self.return_to_start
         )
         self.new_game_button.pack(pady=5)
 
         self.exit_button = tk.Button(
-            self.sidebar, text="Exit Game", command=self.exit_game
+            button_frame, text="Exit Game", width=20, command=self.exit_game
         )
         self.exit_button.pack(pady=5)
 
         if agent1_type == "minimax" or agent2_type == "minimax":
             self.expand_button = tk.Button(
-                self.sidebar,
+                button_frame,
                 text="View Minimax Tree",
+                width=20,
+                bg="lightblue",
+                font=("Helvetica", 10, "bold"),
                 command=self.open_tree_in_new_window,
             )
             self.expand_button.pack(pady=(10, 0))
