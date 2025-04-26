@@ -351,7 +351,7 @@ class Connect4:
         pruned_after = 0
 
         for col in valid_moves:
-            pruned_after += 1 # count this move
+            pruned_after += 1  # count this move
             # Select symbol for current turn
             current_symbol = (
                 player_symbol
@@ -404,7 +404,10 @@ class Connect4:
             # Alpha-beta pruning
             if alpha >= beta:
                 branch_word = "branch" if pruned_after == 1 else "branches"
-                output_widget.insert(tk.END, f"{indent_str}│   └── Pruned (α ≥ β) after {pruned_after} {branch_word}\n")
+                output_widget.insert(
+                    tk.END,
+                    f"{indent_str}│   └── Pruned (α ≥ β) after {pruned_after} {branch_word}\n",
+                )
                 break
 
         # Only print final decision at root
