@@ -183,6 +183,8 @@ class Connect4GUI:
             delay = self.speed_slider.get() if hasattr(self, "speed_slider") else 1000
             self.root.after(delay, self.play_turn)
 
+        self.game_over = False
+
     def draw_board(self):
         """Draws the Connect 4 board grid and empty disc slots on the canvas."""
         for row in range(ROW_COUNT):
@@ -236,6 +238,9 @@ class Connect4GUI:
 
     def play_turn(self, col=None):
         """Handles a single turn: gets move, updates the board, and checks for win/draw."""
+        if self.game_over:
+            return
+
         current_player = (
             self.game.PLAYER_1 if self.turn % 2 == 0 else self.game.PLAYER_2
         )
@@ -283,6 +288,7 @@ class Connect4GUI:
             self.turn_label.config(text="")  # clear turn label
             self.show_game_over_message(f"Player {player_number} Wins!", colour)
             self.root.after(300, self.show_game_stats)
+            self.game_over = True
             return
 
         # Check for draw
@@ -291,6 +297,7 @@ class Connect4GUI:
             self.turn_label.config(text="")
             self.show_game_over_message("It's a Draw!", DRAW_COLOUR)
             self.root.after(300, self.show_game_stats)
+            self.game_over = True
             return
 
         # Next player's turn
@@ -326,6 +333,7 @@ class Connect4GUI:
     def reset_board(self):
         """Resets the game board and turn counter, keeping the same agents."""
         self.turn = 0
+        self.game_over = False
         self.game = Connect4(
             agent1_type=self.agent1_type,
             agent2_type=self.agent2_type,
