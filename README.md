@@ -69,6 +69,16 @@ This is the **final GUI version** of the Connect 4 game, with a visual interface
 
 ---
 
+## Related GitHub Repositories
+
+- [Performance Evaluation](https://github.com/Shelly855/connect4-evaluation)
+- [Basic ML Agent](https://github.com/Shelly855/connect4-basic-ml-agent)
+- [Minimax ML Agent](https://github.com/Shelly855/connect4-minimax-ml-agent)  
+- [Initial ML Training Attempt](https://github.com/Shelly855/connect4-initial-ml)
+- [Old Terminal Version](https://github.com/Shelly855/connect4-terminal)
+
+- ---
+
 ## References
 
 - Keith Galli’s Connect 4 AI (GitHub)
@@ -83,11 +93,3 @@ This is the **final GUI version** of the Connect 4 game, with a visual interface
 - Real Python – Python GUI Programming With Tkinter
   - https://realpython.com/python-gui-tkinter/
   - Used as a reference for building the GUI layout and event handling in Tkinter
-  
- 
----
-
-## GitHub Version (Optional)
-
-[View this folder on GitHub](https://github.com/Shelly855/connect4-ai)
-> **Note:** This GitHub link is optional and not required for marking. The repository may be updated after submission.
