@@ -1,6 +1,6 @@
 # Connect 4
 
-This is the **final GUI version** of the Connect 4 game, with a visual interface built with `tkinter`.
+A Connect 4 game built in Python with AI agents and a visual interface using `tkinter`.
 
 ---
 
@@ -12,8 +12,8 @@ This is the **final GUI version** of the Connect 4 game, with a visual interface
 - [How to Run](#how-to-run)
 - [Files](#files)
 - [Notes](#notes)
+- [Related GitHub Repositories](#related-github-repositories)
 - [References](#references)
-- [GitHub Version (Optional)](#github-version-optional)
 
 ---
 
